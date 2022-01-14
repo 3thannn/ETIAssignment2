@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <title>Create New Comment</title>
+        <meta charset="UTF-8">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        
+    </head>
+    <body>
+        <div class='container pt-5'>
+            <div class="row">
+                <div class="col">
+                    <h1>Student Comments</h1>
+                </div>
+            </div>
+            <div class="row pt-2">
+                <div class="col-6">
+                    <button class="btn btn-outline-success mr-1 active">Students</button>
+                    <button class="btn btn-outline-success mx-1">Tutors</button>
+                    <button class="btn btn-outline-success mx-1">Modules</button>
+                    <button class="btn btn-outline-success mx-1">Classes</button>
+                </div>
+            </div>
+            <div class="row pt-2" id="commentsDiv">
+                
+            </div>
+           
+        </div>
+    </body>
+    <script>
+        $("button").click(function() {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                $(".active").removeClass("active");
+                $(this).addClass('active');
+            }
+            for (var comment in comnentsList) {
+                document.getElementById('commentsDiv').innerHTML += 
+                "<div>" +
+                    '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                    '<p>' + "To:" + comment.TargetName + '</p>' + 
+                    '<p>' + comment.CommentData + '</p>' + 
+                '</div>';
+                console.log(prop);
+                
+            }
+
+        });
+        function commentData(form) {
+            event.preventDefault();
+            const data = new FormData(form);
+            const jsonString = JSON.stringify(Object.fromEntries(data));
+            const obj = JSON.parse(jsonString);
+            obj.TargetID = parseInt(obj.TargetID)
+            obj.Anonymous = parseInt(obj.Anonymous);
+            const jsonString2 = JSON.stringify(obj);
+            console.log(jsonString2);
+            createComment(jsonString2, "http://localhost:5001/api/comment")
+        }
+        function createComment(jsonString, urlString) {
+            $.ajax({
+                type: "POST",
+                url: urlString,
+                data: jsonString,
+                contentType: "application/json",
+                success: function (response, textStatus) {
+                    alert("Successfully Created New Comment!");
+                    // document.getElementById("commentForm").reset();
+                },
+                error: function (textStatus, errorThrown) {
+                    alert("Error:" + textStatus.responseText);
+                }
+            });
+        }
+    </script>
+</html>
