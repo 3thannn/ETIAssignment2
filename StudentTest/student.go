@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -35,7 +36,22 @@ func getStudents(db *sql.DB) []Student {
 	return studentList
 }
 
-func student(w http.ResponseWriter, r *http.Request) {
+func getStudent(db *sql.DB, ID int) Student {
+	studentquery := fmt.Sprintf("SELECT StudentID, Name FROM Student WHERE StudentID = '%d'", ID)
+
+	studentresults, err := db.Query(studentquery)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var student Student
+	for studentresults.Next() {
+		studentresults.Scan(&student.ID, &student.Name)
+	}
+	return student
+}
+
+func students(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
@@ -59,6 +75,29 @@ func student(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func student(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+	// handle error
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	studentID := params["studentid"]
+	studentIDint, err := strconv.Atoi(studentID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		if err == nil {
+			student := getStudent(db, studentIDint)
+			fmt.Println(student)
+			json.NewEncoder(w).Encode(student)
+		} else {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+		}
+	}
+}
+
 func testcode(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		json.NewEncoder(w).Encode("Hello this is a pass")
@@ -75,7 +114,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/student", student).Methods("GET")
+	router.HandleFunc("/api/student", students).Methods("GET")
+
+	router.HandleFunc("/api/getstudent/{studentid}", student).Methods("GET")
 
 	// router.HandleFunc("/api/Rating/student/sent/{CreatorID}", postedRatings).Methods("GET")
 

@@ -40,7 +40,6 @@
             }
         });
         getStudentComments();
-
         function getStudentComments(){
             var studentComments
             url = "http://localhost:5001/api/comment/student";
@@ -50,29 +49,28 @@
                 success: function (response, textStatus) {
                     studentComments = JSON.parse(response);
                     console.log(studentComments);
+                    displayComment(studentComments);
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
                 }
             });
-            console.log("2");
-            console.log(studentComments);
-            for (var comment in studentComments) {
-                console.log(comment);
+        }
+        function displayComment(commentList){
+            for (i = 0; i < commentList.length; i ++) {
+                comment = commentList[i];
                 if (comment.Anonymous == 0){
                     document.getElementById('commentsDiv').innerHTML += 
-                    "<div>" +
-                        '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
-                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                    '<div>' +
+                        '<div>' + '<h4>' + comment.TargetName + '</h4>' + '<span>' + '-'+ comment.DateTimePublished + '</span>' + '</div>' +
+                        '<div>' + '<p>' + "To: " + comment.TargetName + '</p>' + '</div>' +
                         '<p>' + comment.CommentData + '</p>' + 
                     '</div>';
                 }
                 else{
                     document.getElementById('commentsDiv').innerHTML += 
-                    "<div>" +
-                        '<h4>' + "Anonymous User" + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
-                        '<p>' + "To:" + comment.TargetName + '</p>' + 
-                        '<p>' + comment.CommentData + '</p>' + 
+                    '<div class="row commentBox">' +
+                        '<div class="col-8 text-align-left">'+  + '</div>' + '<div class="col-4 text-align-right">' + comment.TargetName    + '</div>'
                     '</div>';
                 }
             }
