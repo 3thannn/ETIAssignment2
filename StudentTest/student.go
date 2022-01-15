@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,12 +13,12 @@ import (
 )
 
 type Student struct {
-	StudentID int
-	Name      string
+	ID   int
+	Name string
 }
 
 func getStudents(db *sql.DB) []Student {
-	studentquery := fmt.Sprintf("SELECT * FROM Student")
+	studentquery := fmt.Sprintf("SELECT StudentID, Name FROM Student")
 
 	studentresults, err := db.Query(studentquery)
 	if err != nil {
@@ -27,15 +28,15 @@ func getStudents(db *sql.DB) []Student {
 	var studentList []Student
 	for studentresults.Next() {
 		var student Student
-		studentresults.Scan(&student.StudentID, &student.Name)
+		studentresults.Scan(&student.ID, &student.Name)
 		studentList = append(studentList, student)
 	}
 
 	return studentList
 }
 
-func postedStudentComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+func student(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -63,6 +64,7 @@ func testcode(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("Hello this is a pass")
 		w.WriteHeader(http.StatusCreated)
 	}
+}
 
 func main() {
 	// This is to allow the headers, origins and methods all to access CORS resource sharing
@@ -73,7 +75,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/student", rating).Methods("GET")
+	router.HandleFunc("/api/student", student).Methods("GET")
 
 	// router.HandleFunc("/api/Rating/student/sent/{CreatorID}", postedRatings).Methods("GET")
 

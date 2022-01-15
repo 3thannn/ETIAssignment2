@@ -13,9 +13,9 @@
         <div class='container pt-5'>
             <h1>New Comment</h1>
             <form id="commentForm" onsubmit="return commentData(this);">
-                <div class="form-group pt-3">
-                    <label for="commentType">Comment Type</label>
-                    <select class="custom-select" name="commentType" id="commentType">
+                <div class="form-group  pt-3">
+                    <label for="CreatorType">Creator Type</label>
+                    <select class="custom-select" name="CreatorType" id="CreatorType">
                         <option selected>Choose...</option>
                         <option value="Student">Student</option>
                         <option value="Class">Class</option>
@@ -24,7 +24,21 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="targetID">TargetID</label>
+                    <label for="CreatorID">Creator ID</label>
+                    <input type="number" class="form-control" name="CreatorID" id="CreatorID">
+                </div>
+                <div class="form-group">
+                    <label for="TargetType">Target Type</label>
+                    <select class="custom-select" name="TargetType" id="TargetType">
+                        <option selected>Choose...</option>
+                        <option value="Student">Student</option>
+                        <option value="Class">Class</option>
+                        <option value="Module">Module</option>
+                        <option value="Tutor">Tutor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="targetID">Target ID</label>
                     <input type="number" class="form-control" name="TargetID" id="TargetID">
                 </div>
                 <div class="form-group">
@@ -49,7 +63,8 @@
             const data = new FormData(form);
             const jsonString = JSON.stringify(Object.fromEntries(data));
             const obj = JSON.parse(jsonString);
-            obj.TargetID = parseInt(obj.TargetID)
+            obj.CreatorID = parseInt(obj.CreatorID);
+            obj.TargetID = parseInt(obj.TargetID);
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);

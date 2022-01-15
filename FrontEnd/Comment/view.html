@@ -18,10 +18,10 @@
             </div>
             <div class="row pt-2">
                 <div class="col-6">
-                    <button class="btn btn-outline-success mr-1 active">Students</button>
-                    <button class="btn btn-outline-success mx-1">Tutors</button>
-                    <button class="btn btn-outline-success mx-1">Modules</button>
-                    <button class="btn btn-outline-success mx-1">Classes</button>
+                    <button class="btn btn-outline-success mr-1 active" onclick="getStudentComments()">Students</button>
+                    <button class="btn btn-outline-success mx-1" onclick="getTutorComments()">Tutors</button>
+                    <button class="btn btn-outline-success mx-1" onclick="getModulesComments()">Modules</button>
+                    <button class="btn btn-outline-success mx-1" onclick="getClassComments()">Classes</button>
                 </div>
             </div>
             <div class="row pt-2" id="commentsDiv">
@@ -38,43 +38,144 @@
                 $(".active").removeClass("active");
                 $(this).addClass('active');
             }
-            for (var comment in comnentsList) {
-                document.getElementById('commentsDiv').innerHTML += 
-                "<div>" +
-                    '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
-                    '<p>' + "To:" + comment.TargetName + '</p>' + 
-                    '<p>' + comment.CommentData + '</p>' + 
-                '</div>';
-                console.log(prop);
-                
-            }
-
         });
-        function commentData(form) {
-            event.preventDefault();
-            const data = new FormData(form);
-            const jsonString = JSON.stringify(Object.fromEntries(data));
-            const obj = JSON.parse(jsonString);
-            obj.TargetID = parseInt(obj.TargetID)
-            obj.Anonymous = parseInt(obj.Anonymous);
-            const jsonString2 = JSON.stringify(obj);
-            console.log(jsonString2);
-            createComment(jsonString2, "http://localhost:5001/api/comment")
-        }
-        function createComment(jsonString, urlString) {
+        getStudentComments();
+
+        function getStudentComments(){
+            var studentComments
+            url = "http://localhost:5001/api/comment/student";
             $.ajax({
-                type: "POST",
-                url: urlString,
-                data: jsonString,
-                contentType: "application/json",
+                type: "GET",
+                url: url,
                 success: function (response, textStatus) {
-                    alert("Successfully Created New Comment!");
-                    // document.getElementById("commentForm").reset();
+                    studentComments = JSON.parse(response);
+                    console.log(studentComments);
                 },
-                error: function (textStatus, errorThrown) {
-                    alert("Error:" + textStatus.responseText);
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
                 }
             });
+            console.log("2");
+            console.log(studentComments);
+            for (var comment in studentComments) {
+                console.log(comment);
+                if (comment.Anonymous == 0){
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+                else{
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + "Anonymous User" + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+            }
+        }
+        function getTutorComments(){
+            document.getElementById('commentsDiv'),innerHTML = "";
+            url = "http://localhost:5001/api/comment/tutor";
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    console.log(response);
+                    var tutorComments = JSON.parse(response);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
+            for (var comment in tutorComments) {
+                document.getElementById('commentsDiv'),innerHTML = "";
+                if (comment.Anonymous == 0){
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+                else{
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + "Anonymous User" + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+            }
+        }
+        function getClassComments(){
+            document.getElementById('commentsDiv'),innerHTML = "";
+            url = "http://localhost:5001/api/comment/class";
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    console.log(response);
+                    var classComments = JSON.parse(response);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
+            for (var comment in classComments) {
+                if (comment.Anonymous == 0){
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+                else{
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + "Anonymous User" + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+            }
+        }
+        function getModuleComments(){
+            document.getElementById('commentsDiv'),innerHTML = "";
+            url = "http://localhost:5001/api/comment/module";
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    console.log(response);
+                    var moduleComments = JSON.parse(response);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
+            for (var comment in moduleComments) {
+                if (comment.Anonymous == 0){
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + comment.CommentorName + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+                else{
+                    document.getElementById('commentsDiv').innerHTML += 
+                    "<div>" +
+                        '<h4>' + "Anonymous User" + '</h4>' + '<span>' + '- '+ comment.DateTimePublished + '</span>' + '<br>' +
+                        '<p>' + "To:" + comment.TargetName + '</p>' + 
+                        '<p>' + comment.CommentData + '</p>' + 
+                    '</div>';
+                }
+            }
         }
     </script>
 </html>

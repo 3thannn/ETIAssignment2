@@ -10,7 +10,7 @@ CREATE TABLE Rating(
 	CreatorID int NULL,
 	CreatorType varchar(255),
 	TargetID int NOT NULL,
-    RatingType varchar(255) NOT NULL,
+    TargetType varchar(255) NOT NULL,
 	RatingScore int NOT NULL,
 	Anonymous bool NOT NULL DEFAULT False,
 	DateTimePublished datetime DEFAULT CURRENT_TIMESTAMP());
