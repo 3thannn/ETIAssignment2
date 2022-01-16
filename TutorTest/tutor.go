@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -17,7 +18,7 @@ type Tutor struct {
 	Name string
 }
 
-func getTutor(db *sql.DB) []Tutor {
+func getTutors(db *sql.DB) []Tutor {
 	tutorQuery := "SELECT TutorID, Name FROM Tutor"
 
 	tutorResults, err := db.Query(tutorQuery)
@@ -35,7 +36,23 @@ func getTutor(db *sql.DB) []Tutor {
 	return tutorList
 }
 
-func tutor(w http.ResponseWriter, r *http.Request) {
+func getTutor(db *sql.DB, ID int) Tutor {
+	tutorQuery := fmt.Sprintf("SELECT TutorID, Name FROM Tutor WHERE TutorID = '%d'", ID)
+
+	tutorResults, err := db.Query(tutorQuery)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var tutor Tutor
+	for tutorResults.Next() {
+		tutorResults.Scan(&tutor.ID, &tutor.Name)
+	}
+
+	return tutor
+}
+
+func tutors(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
@@ -46,13 +63,36 @@ func tutor(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == "GET" {
 		if err == nil {
-			tutorList := getTutor(db)
+			tutorList := getTutors(db)
 			if len(tutorList) > 0 {
 				fmt.Println(tutorList)
 				json.NewEncoder(w).Encode(tutorList)
 			} else {
 				w.WriteHeader(http.StatusNotFound)
 			}
+		} else {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+		}
+	}
+}
+
+func tutor(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+	// handle error
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	tutorID := params["tutorid"]
+	tutorIDint, err := strconv.Atoi(tutorID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		if err == nil {
+			tutor := getTutor(db, tutorIDint)
+			fmt.Println(tutor)
+			json.NewEncoder(w).Encode(tutor)
 		} else {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		}
@@ -75,7 +115,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/tutor", tutor).Methods("GET")
+	router.HandleFunc("/api/tutor", tutors).Methods("GET")
+
+	router.HandleFunc("/api/gettutor/{tutorid}", tutor).Methods("GET")
 
 	// router.HandleFunc("/api/Rating/tutor/sent/{CreatorID}", postedRatings).Methods("GET")
 

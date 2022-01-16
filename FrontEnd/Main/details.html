@@ -16,28 +16,34 @@
                 <div class="col-12 pt-5" id="headerDiv" style="text-align: center;">
                     
                 </div>
-                <div class="col-6 pt-5" style="text-align: center;">
-                    <button class="btn btn-outline-success active" style="font-size:30px; font-weight: bold; width: 200px;" onclick="getStudent()">Comments</button>
+                <div class="col-6 pt-5" id="commentsButton" style="text-align: center;">
+        
                 </div>
-                <div class="col-6 pt-5" style="text-align: center;">
-                    <button class="btn btn-outline-success" style="font-size:30px; font-weight: bold; width: 200px;">Ratings</button>
+                <div class="col-6 pt-5" id="ratingsButton" style="text-align: center;">
+
                 </div>
             </div>
-            <div id="divContainer" class="mt-4 overflow-auto" style="max-height:35vh;">
+            <div id="divContainer" class="mt-4" style="max-height:35vh !important; overflow-y: scroll;">
 
             </div>
-            <div>
-                <div class="row mt-3 px-5" id="form">
-                    
-                </div>
+            <div class="row mt-3 px-5" id="form">
+                
             </div>
+            
         </div>
     </body>
     <script>
         url = document.URL;
         var type = url.substring(url.lastIndexOf('?') + 1);
         if(type == "Student"){
-            getStudent(type);
+            document.getElementById('commentsButton').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getStudent(' + "'comments'" + ')"' + '>Comments</button>';
+            document.getElementById('ratingsButton').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getStudent(' + "'ratings'" + ')"' + '>Ratings</button>';
+            getStudent("comments");
+        }
+        else if(type == "Tutor"){
+            document.getElementById('commentsButton').setAttribute("onclick", 'getTutor(type,"comments")');
+            document.getElementById('ratingsButton').setAttribute("onclick", 'getTutor(type,"ratings")');
+            getTutor("comments");
         }
         $("button").click(function() {
             if ($(this).hasClass("active")) {
@@ -47,10 +53,11 @@
                 $(this).addClass('active');
             }
         });
-        function getStudent(type){
+        function getStudent(displayChoice){
+            console.log("runs getStudent");
             url = document.URL;
             var url1 = "http://localhost:5003/api/getstudent";
-            var id = url.substring(url.lastIndexOf('=') + 1);
+            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -58,17 +65,50 @@
                 success: function (response, textStatus) {
                     student = JSON.parse(response);
                     console.log(student);
-                    getComments(student,type);
+                    if(displayChoice == "comments"){
+                        getComments(student);
+                    }
+                    else{
+                        getRatings(student);
+                        console.log("this ran here");
+                    }
+                    
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
                 }
             });
         }
-        function getComments(student,type){
+        function getTutor(displayChoice){
             url = document.URL;
-            var url1 = "http://localhost:5001/api/comment/student";
-            var id = url.substring(url.lastIndexOf('=') + 1);
+            var url1 = "http://localhost:5004/api/gettutor";
+            var id = url.substring(url.lastIndexOf('=') + 1)[0];
+            fullurl = url1 + '/' + id;
+            $.ajax({
+                type: "GET",
+                url: fullurl,
+                success: function (response, textStatus) {
+                    tutor = JSON.parse(response);
+                    console.log(student);
+                    if(displayChoice == "comments"){
+                        getComments(tutor);
+                    }
+                    else{
+                        getRatings(tutor);
+                    }
+                    
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
+        }
+        function getComments(object){
+            console.log("runs getComments");
+            url = document.URL;
+            var type = url.substring(url.lastIndexOf('?') + 1);
+            var url1 = "http://localhost:5001/api/comment/" + type.toLowerCase();
+            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -76,86 +116,88 @@
                 success: function (response, textStatus) {
                     commentList = JSON.parse(response);
                     console.log(commentList);
-                    displayCommentData(student, commentList, type)
-                    getRatings();
+                    displayCommentData(object, commentList, type);
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
                 }
             });
         }
-        function getRatings(){
+        function getRatings(object){
+            console.log("runs getRating");
             url = document.URL;
-            var url1 = "http://localhost:5002/api/rating/student";
-            var id = url.substring(url.lastIndexOf('=') + 1);
+            var type = url.substring(url.lastIndexOf('?') + 1);
+            var url1 = "http://localhost:5002/api/rating/" + type.toLowerCase();
+            var id = (url.substring(url.lastIndexOf('=') + 1))[0];
             fullurl = url1 + '/' + id;
+            console.log(fullurl);
             $.ajax({
                 type: "GET",
                 url: fullurl,
                 success: function (response, textStatus) {
                     ratingList = JSON.parse(response);
                     console.log(ratingList);
+                    console.log(ratingList.length);
+                    displayRatingData(object, ratingList, type);
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
                 }
             });
         }
-        function displayCommentData(student, commentList, type){
+        function displayCommentData(object, commentList, type){
+            console.log("runs displayCommentData");
             url = document.URL;
-            var id = url.substring(url.lastIndexOf('=') + 1);
+            var id = (url.substring(url.lastIndexOf('=') + 1))[0];
             document.getElementById('headerDiv').innerHTML = '';
-            document.getElementById('divContainer').innerHTML = '';
+            document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">All Comments</h2>';
             var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            var headerContent = '<i class="fa fa-user m-4" style="font-size:40px"></i>' + '<span style="font-size:40px; font-weight:bold;">' + student.Name + '</span>'
+            var headerContent = '<i class="fa fa-user m-4" style="font-size:40px"></i>' + '<span style="font-size:40px; font-weight:bold;">' + object.Name + '</span>';
             document.getElementById('headerDiv').innerHTML += headerContent;
             for (i = 0; i < commentList.length; i ++) {
                 object = commentList[i];
                 var commentDate = new Date(object.DateTimePublished);
                 formatedCommentDate = commentDate.toLocaleDateString("en-US", options);
-
+                formatedCommentTime = commentDate.toLocaleTimeString("en-US");
                 var creatorName = "";
                 if (object.Anonymous == 1){
-                    creatorName = "Anonymous User"
+                    creatorName = "Anonymous User";
                 }
                 else{
-                    creatorName = object.CreatorName
+                    creatorName = object.CreatorName;
                 }
                 var commentData = 
                 '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
-                    '<div class="col-3" style="font-size:20px;">' +
-                        '<span style="font-weight:bold;">' + creatorName + '</span>' + '</br>' +
-                         '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
-                         '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</span>' +
+                    '<div class="col-4">' +
+                        '<span style="font-weight:bold; font-size:20px;">' + creatorName + '</span>' + '</br>' +
+                        '<span style="font-weight:bold; font-size:15px; color:grey">' + object.CreatorType  + '</span>' + '</br>' +
+                        '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                        '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</br>' + formatedCommentTime + '</span>' +
                     '</div>' +
-                    '<div class="col-9">' +
+                    '<div class="col-8">' +
                         object.CommentData  + 
                     '</div>' + 
                 '</div>' ;
                 document.getElementById('divContainer').innerHTML += commentData;
             }
-            var formData = '<form id="commentForm" onsubmit="return commentData(this);" style="width: 100%;">' +
-                                ' <div class="form-group pt-3">' +
-                                    '<label for="CreatorType">Creator Type</label>' +
-                                        '<select class="custom-select" name="CreatorType" id="CreatorType">' +
-                                            '<option selected>Choose...</option>' +
-                                            '<option value="Student">Student</option>' +
-                                            '<option value="Class">Class</option>' +
-                                            '<option value="Module">Module</option>' +
-                                            '<option value="Tutor">Tutor</option>' +
-                                        '</select>' +
+            var formData = '<h2>Create New Comment</h2>' +
+                            '<form id="commentForm" onsubmit="return createdCommentData(this);" style="width: 100%;">' +
+                                ' <div class="form-group"  style="display:none;">' +
+                                    '<input type="text" class="form-control" name="CreatorType" id="CreatorType" value="Student">' +
+                                        
                                     '</div>' +
-                                '<div class="form-group">' +
+                                    //!!!!Need to edit value for creator ID for to be logged in user, along with Creator Type!!!!
+                                '<div class="form-group" style="display:none;"">' +
                                     '<label for="CreatorID">Creator ID</label>' +
-                                    '<input type="number" class="form-control" name="CreatorID" id="CreatorID">' +
+                                    '<input type="number" class="form-control" name="CreatorID" id="CreatorID" value="1">' +
                                  '</div>' +
-                                 '<div class="form-group">' +
-                                    '<input type="text" class="form-control" name="TargetType" id="TargetType" style="display:none;"' + 'value=' + type + '>' +
+                                 '<div class="form-group" style="display:none;">' +
+                                    '<input type="text" class="form-control" name="TargetType" id="TargetType"' + 'value=' + type + '>' +
                                 '</div>' +
-                                '<div class="form-group">'+
-                                    '<input type="number" class="form-control" name="TargetID" id="TargetID" style="display:none;"' + 'value=' + id + '>' +
+                                '<div class="form-group" style="display:none;">'+
+                                    '<input type="number" class="form-control" name="TargetID" id="TargetID"' + 'value=' + id + '>' +
                                 '</div>' +
-                                '<div class="form-group">' +
+                                '<div class="form-group pt-3">' +
                                     '<label for="commentData">Comment</label>' +
                                     '<textarea class="form-control" name="CommentData" id="CommentData" placeholder="Enter Your Comment"></textarea>' +
                                 '</div>' +
@@ -165,12 +207,181 @@
                                         'Anonymous' +
                                     '</label>' +
                                 '</div>' +        
-                                '</br>'
-                                '<button type="submit" class="btn btn-primary">Submit</button>'
-                                '<a class="btn btn-danger" style="color:white;"' + 'onclick="window.location.href=' + "'../Main/index.html" +"'" + '>Back</a>' +
-                            '</form>'
+                                '</br>' +
+                                '<button type="submit" class="btn btn-primary">Submit</button>' +
+                                '<a class="btn btn-danger ml-2"' + 'href=' + '"../Main/index.html"' + '>Back</a>' +
+                            '</form>';
                        
             document.getElementById("form").innerHTML = formData;
+        }
+        function createdCommentData(form) {
+            event.preventDefault();
+            const data = new FormData(form);
+            const jsonString = JSON.stringify(Object.fromEntries(data));
+            const obj = JSON.parse(jsonString);
+            obj.CreatorID = parseInt(obj.CreatorID);
+            obj.TargetID = parseInt(obj.TargetID);
+            obj.Anonymous = parseInt(obj.Anonymous);
+            const jsonString2 = JSON.stringify(obj);
+            console.log(jsonString2);
+            createComment(jsonString2, "http://localhost:5001/api/comment");
+        }
+        function createComment(jsonString, urlString) {
+            $.ajax({
+                type: "POST",
+                url: urlString,
+                data: jsonString,
+                contentType: "application/json",
+                success: function (response, textStatus) {
+                    alert("Successfully Created New Comment!");
+                    // document.getElementById("commentForm").reset();
+                    url = document.URL;
+                    getStudent("Student");
+                },
+                error: function (textStatus, errorThrown) {
+                    alert("Error:" + textStatus.responseText);
+                }
+            });
+        }
+        function displayRatingData(object, ratingList, type){
+            console.log("runs displayRatingData");
+            console.log(ratingList);
+            url = document.URL;
+            var id = (url.substring(url.lastIndexOf('=') + 1))[0];
+            document.getElementById('headerDiv').innerHTML = '';
+            document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">All Ratings</h2>';
+            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            var headerContent = '<i class="fa fa-user m-4" style="font-size:40px"></i>' + '<span style="font-size:40px; font-weight:bold;">' + object.Name + '</span>';
+            document.getElementById('headerDiv').innerHTML += headerContent;
+            console.log(ratingList.length);
+            for (a = 0; a < ratingList.length; a++) {
+                console.log("a = " + a);
+                object = ratingList[a];
+                console.log(object);
+                var ratingDate = new Date(object.DateTimePublished);
+                formatedRatingDate = ratingDate.toLocaleDateString("en-US", options);
+                formatedRatingTime = ratingDate.toLocaleTimeString("en-US");
+                var creatorName = "";
+                if (object.Anonymous == 1){
+                    creatorName = "Anonymous User";
+                }
+                else{
+                    creatorName = object.CreatorName;
+                }
+                var colID = "ratingData" + a;
+                var ratingData = 
+                '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
+                    '<div class="col-4">' +
+                        '<span style="font-weight:bold; font-size:20px;">' + creatorName + '</span>' + '</br>' +
+                        '<span style="font-weight:bold; font-size:15px; color:grey">' + object.CreatorType  + '</span>' + '</br>' +
+                        '<span style="font-size:13px;">' +  'Rated At:' + '</span>' + '</br>' + 
+                        '<span style="font-size:13px; font-style:italic;">' + formatedRatingDate + '</br>' + formatedRatingTime + '</span>' +
+                    '</div>' +
+                    '<div class="col-8" id="' + colID + '">' +
+                    '</div>' + 
+                '</div>' ;
+                document.getElementById('divContainer').innerHTML += ratingData;
+                for (y = 0; y < parseInt(object.RatingScore); y++){
+                    document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
+                }
+                var remainingStars = (5 - parseInt(object.RatingScore));
+                console.log("remaining stars = " + remainingStars);
+                for (y = 0; y < remainingStars; y++){
+                    document.getElementById(colID).innerHTML += '<i class="fa fa-star-o" style="font-size:30px"></i>'
+                }
+                
+            }
+            var formData = '<h2>Create New Rating</h2>' +
+                            '<form id="ratingForm" onsubmit="return createdRatingData(this);" style="width: 100%;">' +
+                                ' <div class="form-group"  style="display:none;">' +
+                                    '<input type="text" class="form-control" name="CreatorType" id="CreatorType" value="Student">' +
+                                        
+                                    '</div>' +
+                                    //!!!!Need to edit value for creator ID for to be logged in user, along with Creator Type!!!!
+                                '<div class="form-group" style="display:none;"">' +
+                                    '<label for="CreatorID">Creator ID</label>' +
+                                    '<input type="number" class="form-control" name="CreatorID" id="CreatorID" value="1">' +
+                                 '</div>' +
+                                 '<div class="form-group" style="display:none;">' +
+                                    '<input type="text" class="form-control" name="TargetType" id="TargetType"' + 'value=' + type + '>' +
+                                '</div>' +
+                                '<div class="form-group" style="display:none;">'+
+                                    '<input type="number" class="form-control" name="TargetID" id="TargetID"' + 'value=' + id + '>' +
+                                '</div>' +
+                                '<div class="form-group pt-3">' +
+                                    '<label for="RatingScore">Give a rating out of 5</label><br>' +
+                                    '<div class="form-check form-check-inline">' +
+                                        '<input class="form-check-input" type="radio" name="RatingScore" id="RatingScore1" value="1">'+
+                                        '<label class="form-check-label" for="exampleRadios1">'+
+                                            '1' +
+                                        '</label>' +
+                                     '</div>' +
+                                    '<div class="form-check form-check-inline">' +
+                                        '<input class="form-check-input" type="radio" name="RatingScore" id="RatingScore2" value="2">' +
+                                        '<label class="form-check-label" for="exampleRadios2">' +
+                                            '2' +
+                                        '</label>' +
+                                    '</div>' +
+                                    '<div class="form-check disabled form-check-inline">' +
+                                    '<input class="form-check-input" type="radio" name="RatingScore" id="RatingScore3" value="option3">' +
+                                    '<label class="form-check-label" for="exampleRadios3">' +
+                                        '3' +
+                                    '</label>' +
+                                    '</div>' +
+                                    '<div class="form-check disabled form-check-inline">' +
+                                        '<input class="form-check-input" type="radio" name="RatingScore" id="RatingScore4" value="4">' +
+                                        '<label class="form-check-label" for="exampleRadios3">' +
+                                            '4' +
+                                        '</label>' + 
+                                    '</div>' +
+                                    '<div class="form-check disabled form-check-inline">' +
+                                        '<input class="form-check-input" type="radio" name="RatingScore" id="RatingScore5" value="5">' +
+                                        '<label class="form-check-label" for="exampleRadios3">' +
+                                            '5' +
+                                        '</label>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="form-check">' +
+                                    '<input class="form-check-input" type="checkbox" value="1" id="Anonymous" name="Anonymous">' +
+                                    '<label class="form-check-label" for="anonymous">' +
+                                        'Anonymous' +
+                                    '</label>' +
+                                '</div>' +        
+                                '</br>' +
+                                '<button type="submit" class="btn btn-primary">Submit</button>' +
+                                '<a class="btn btn-danger ml-2"' + 'href=' + '"../Main/index.html"' + '>Back</a>' +
+                            '</form>';
+                       
+            document.getElementById("form").innerHTML = formData;
+        }
+        function createdRatingData(form) {
+            event.preventDefault();
+            const data = new FormData(form);
+            const jsonString = JSON.stringify(Object.fromEntries(data));
+            const obj = JSON.parse(jsonString);
+            obj.RatingScore = parseInt(obj.RatingScore);
+            obj.CreatorID = parseInt(obj.CreatorID);
+            obj.TargetID = parseInt(obj.TargetID);
+            obj.Anonymous = parseInt(obj.Anonymous);
+            const jsonString2 = JSON.stringify(obj);
+            console.log(jsonString2);
+            createRating(jsonString2, "http://localhost:5002/api/rating");
+        }
+        function createRating(jsonString, urlString) {
+            $.ajax({
+                type: "POST",
+                url: urlString,
+                data: jsonString,
+                contentType: "application/json",
+                success: function (response, textStatus) {
+                    alert("Successfully Created New Rating!");
+                    url = document.URL;
+                    location.reload();
+                },
+                error: function (textStatus, errorThrown) {
+                    alert("Error:" + textStatus.responseText);
+                }
+            });
         }
     </script>
 </html>

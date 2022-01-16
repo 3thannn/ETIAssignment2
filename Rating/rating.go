@@ -160,7 +160,7 @@ func getStudentRatings(db *sql.DB, targetID int) []Rating {
 	var studentRatingList []Rating
 	for studentresults.Next() {
 		var rating Rating
-		studentresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		studentresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, &rating.DateTimePublished)
 		if rating.Anonymous == 0 {
 			if rating.CreatorType == "Student" {
 				student := linkStudentToID(db, rating.CreatorID, studentList)
@@ -295,20 +295,9 @@ func postRating(db *sql.DB, Rating Rating) {
 	Anonymous := Rating.Anonymous
 	println(Rating.Anonymous)
 	TargetType := Rating.TargetType
-	query := ""
-	if Rating.TargetType == "Student" {
-		query = fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous) VALUES ('%d', '%s', '%d', '%s', '%d', '%b')",
-			CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
-	} else if Rating.TargetType == "Class" {
-		query = fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous) VALUES ('%d', '%s', '%d', '%s', '%d', '%b')",
-			CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
-	} else if Rating.TargetType == "Module" {
-		query = fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous) VALUES ('%d', '%s', '%d', '%s', '%d', '%b')",
-			CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
-	} else if Rating.TargetType == "Tutor" {
-		query = fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous) VALUES ('%d', '%s', '%d', '%s', '%d', '%b')",
-			CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
-	}
+
+	query := fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous, DateTimePublished) VALUES ('%d', '%s', '%d', '%s', '%d', '%b', NOW())",
+		CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
 	_, err := db.Query(query) //Run Query
 
 	if err != nil {
@@ -347,6 +336,7 @@ func rating(w http.ResponseWriter, r *http.Request) {
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err == nil {
 			json.Unmarshal(reqBody, &newRating)
+			fmt.Println(newRating)
 			postRating(db, newRating)
 			w.WriteHeader(http.StatusCreated)
 			w.Write([]byte("201 - Rating Posted!"))
