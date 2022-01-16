@@ -48,6 +48,7 @@ func getAllStudents(db *sql.DB) []Object {
 			fmt.Println("202 - Successfully received Students!")
 		}
 	}
+	fmt.Println(studentList)
 	return studentList
 }
 
@@ -108,82 +109,167 @@ func getAllModules(db *sql.DB) []Object {
 	return moduleList
 }
 
-func getStudentRatings(db *sql.DB, CreatorID int) []Rating {
-	studentquery := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%i' AND TargetType = Student", CreatorID)
+func linkStudentToID(db *sql.DB, id int, studentList []Object) Object {
+	var student Object
+	for _, student := range studentList {
+		if student.ID == id {
+			return student
+		}
+	}
+	return student
+}
 
+func linkTutorToID(db *sql.DB, id int, tutorList []Object) Object {
+	var tutor Object
+	for _, tutor := range tutorList {
+		if tutor.ID == id {
+			return tutor
+		}
+	}
+	return tutor
+}
+
+func linkClasstToID(db *sql.DB, id int, classList []Object) Object {
+	var class Object
+	for _, class := range classList {
+		if class.ID == id {
+			return class
+		}
+	}
+	return class
+}
+
+func linkModuleToID(db *sql.DB, id int, moduleList []Object) Object {
+	var module Object
+	for _, module := range moduleList {
+		if module.ID == id {
+			return module
+		}
+	}
+	return module
+}
+
+func getStudentRatings(db *sql.DB, targetID int) []Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	studentquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Student' AND TargetID = '%d'", targetID)
 	studentresults, err := db.Query(studentquery)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	var studentRatingList []Rating
 	for studentresults.Next() {
-		var Rating Rating
-		Rating.TargetType = "Student"
-		studentresults.Scan(&Rating.RatingID, &Rating.CreatorID, &Rating.CreatorType, &Rating.TargetID, &Rating.TargetType, &Rating.RatingScore, &Rating.Anonymous, Rating.DateTimePublished)
-		studentRatingList = append(studentRatingList, Rating)
-		if Rating.CreatorType == "Tutor" {
-
+		var rating Rating
+		studentresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		if rating.Anonymous == 0 {
+			if rating.CreatorType == "Student" {
+				student := linkStudentToID(db, rating.CreatorID, studentList)
+				rating.CreatorName = student.Name
+			} else if rating.CreatorType == "Tutor" {
+				tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+				rating.CreatorName = tutor.Name
+			}
 		}
+		student := linkStudentToID(db, rating.TargetID, studentList)
+		rating.TargetName = student.Name
+		studentRatingList = append(studentRatingList, rating)
+		fmt.Println(rating)
 	}
 	return studentRatingList
 }
 
-//STILL NEED TO DO GET STUDENT Ratings FROM TUTOR
-
-func getClassRatings(db *sql.DB, CreatorID int) []Rating {
-	classquery := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%i' AND TargetType = Class", CreatorID)
+func getClassRatings(db *sql.DB, targetID int) []Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	classList := getAllClasses(db)
+	classquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Class' AND TargetID = '%d'", targetID)
 	classresults, err := db.Query(classquery)
 	if err != nil {
 		panic(err.Error())
 	}
 	var classRatingList []Rating
 	for classresults.Next() {
-		var Rating Rating
-		Rating.TargetType = "Class"
-		classresults.Scan(&Rating.RatingID, &Rating.CreatorID, &Rating.CreatorType, &Rating.TargetID, &Rating.TargetType, &Rating.RatingScore, &Rating.Anonymous, Rating.DateTimePublished)
-		classRatingList = append(classRatingList, Rating)
+		var rating Rating
+		classresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		if rating.Anonymous == 0 {
+			if rating.CreatorType == "Student" {
+				student := linkStudentToID(db, rating.CreatorID, studentList)
+				rating.CreatorName = student.Name
+			} else if rating.CreatorType == "Tutor" {
+				tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+				rating.CreatorName = tutor.Name
+			}
+		}
+		class := linkClasstToID(db, rating.TargetID, classList)
+		rating.TargetName = class.Name
+		fmt.Println(rating)
+		classRatingList = append(classRatingList, rating)
 	}
 	return classRatingList
 }
 
-func getModuleRatings(db *sql.DB, CreatorID int) []Rating {
-	modulequery := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%i' AND TargetType = Module", CreatorID)
+func getModuleRatings(db *sql.DB, targetID int) []Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	modulequery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Module' AND TargetID = '%d'", targetID)
 	moduleresults, err := db.Query(modulequery)
 	if err != nil {
 		panic(err.Error())
 	}
 	var moduleRatingList []Rating
 	for moduleresults.Next() {
-		var Rating Rating
-		Rating.TargetType = "Module"
-		moduleresults.Scan(&Rating.RatingID, &Rating.CreatorID, &Rating.CreatorType, &Rating.TargetID, &Rating.TargetType, &Rating.RatingScore, &Rating.Anonymous, Rating.DateTimePublished)
-		moduleRatingList = append(moduleRatingList, Rating)
+		var rating Rating
+		moduleresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		if rating.Anonymous == 0 {
+			if rating.CreatorType == "Student" {
+				student := linkStudentToID(db, rating.CreatorID, studentList)
+				rating.CreatorName = student.Name
+			} else if rating.CreatorType == "Tutor" {
+				tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+				rating.CreatorName = tutor.Name
+			}
+		}
+		module := linkModuleToID(db, rating.TargetID, moduleList)
+		rating.TargetName = module.Name
+		fmt.Println(rating)
+		moduleRatingList = append(moduleRatingList, rating)
 	}
 	return moduleRatingList
 }
 
-func getTutorRatings(db *sql.DB, CreatorID int) []Rating {
-	tutorquery := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%i' AND TargetType = Tutor", CreatorID)
+func getTutorRatings(db *sql.DB, targetID int) []Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	tutorquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Tutor' AND TargetID = '%d'", targetID)
 	tutorresults, err := db.Query(tutorquery)
 	if err != nil {
 		panic(err.Error())
 	}
 	var tutorRatingList []Rating
 	for tutorresults.Next() {
-		var Rating Rating
-		Rating.TargetType = "Tutor"
-		tutorresults.Scan(&Rating.RatingID, &Rating.CreatorID, &Rating.CreatorType, &Rating.TargetID, &Rating.TargetType, &Rating.RatingScore, &Rating.Anonymous, Rating.DateTimePublished)
-		tutorRatingList = append(tutorRatingList, Rating)
+		var rating Rating
+		tutorresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		if rating.Anonymous == 0 {
+			if rating.CreatorType == "Student" {
+				student := linkStudentToID(db, rating.CreatorID, studentList)
+				rating.CreatorName = student.Name
+			} else if rating.CreatorType == "Tutor" {
+				tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+				rating.CreatorName = tutor.Name
+			}
+		}
+		tutor := linkTutorToID(db, rating.TargetID, tutorList)
+		rating.TargetName = tutor.Name
+		fmt.Println(rating)
+		tutorRatingList = append(tutorRatingList, rating)
 	}
 	return tutorRatingList
 }
 
 //Get all Ratings received
 func getReceivedRatings(db *sql.DB, CreatorID int) []Rating {
-
 	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%i' AND TargetType = Student", CreatorID)
-
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -343,6 +429,25 @@ func postedStudentRatings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func studentRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	params := mux.Vars(r)
+	studentID := params["studentid"]
+	studentIDint, err := strconv.Atoi(studentID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		studentRatingList := getStudentRatings(db, studentIDint)
+		if len(studentRatingList) > 0 {
+			fmt.Println(studentRatingList)
+			json.NewEncoder(w).Encode(studentRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
 func testcode(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		json.NewEncoder(w).Encode("Hello this is a pass")
@@ -360,6 +465,8 @@ func main() {
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
 	router.HandleFunc("/api/rating", rating).Methods("POST", "PUT")
+
+	router.HandleFunc("/api/rating/student/{studentid}", studentRatings).Methods("GET")
 
 	// router.HandleFunc("/api/Rating/student/sent/{CreatorID}", postedRatings).Methods("GET")
 

@@ -32,8 +32,6 @@ type Object struct {
 	Name string
 }
 
-var db *sql.DB
-
 //Gets all Student's ID which is tied to StudentID
 func getAllStudents(db *sql.DB) []Object {
 	url := "http://localhost:5003/api/student"
@@ -143,7 +141,7 @@ func linkStudentToID(db *sql.DB, id int, studentList []Object) Object {
 	return student
 }
 
-func linkTutortToID(db *sql.DB, id int, tutorList []Object) Object {
+func linkTutorToID(db *sql.DB, id int, tutorList []Object) Object {
 	var tutor Object
 	for _, tutor := range tutorList {
 		if tutor.ID == id {
@@ -178,13 +176,14 @@ func linkModuleToID(db *sql.DB, id int, moduleList []Object) Object {
 func getStudentComments(db *sql.DB, targetID int) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
+	fmt.Println(studentList)
+	fmt.Println(tutorList)
 	studentquery := fmt.Sprintf("SELECT * FROM Comment WHERE TargetType = 'Student' AND TargetID = '%d';", targetID)
 
 	studentresults, err := db.Query(studentquery)
 	if err != nil {
 		panic(err.Error())
 	}
-	println("It didnt run here!")
 	var studentCommentList []Comment
 	for studentresults.Next() {
 		var comment Comment
@@ -193,9 +192,11 @@ func getStudentComments(db *sql.DB, targetID int) []Comment {
 			if comment.CreatorType == "Student" {
 				student := linkStudentToID(db, comment.CreatorID, studentList)
 				comment.CreatorName = student.Name
+				println(student.Name)
 			} else if comment.CreatorType == "Tutor" {
-				tutor := linkTutortToID(db, comment.CreatorID, tutorList)
+				tutor := linkTutorToID(db, comment.CreatorID, tutorList)
 				comment.CreatorName = tutor.Name
+				println(tutor.Name)
 			}
 		}
 		student := linkStudentToID(db, comment.TargetID, studentList)
@@ -229,7 +230,7 @@ func getClassComments(db *sql.DB) []Comment {
 				fmt.Println(student)
 				comment.CreatorName = student.Name
 			} else if comment.CreatorType == "Tutor" {
-				tutor := linkTutortToID(db, comment.CreatorID, tutorList)
+				tutor := linkTutorToID(db, comment.CreatorID, tutorList)
 				comment.CreatorName = tutor.Name
 			}
 		}
@@ -263,7 +264,7 @@ func getModuleComments(db *sql.DB) []Comment {
 				student := linkStudentToID(db, comment.CreatorID, studentList)
 				comment.CreatorName = student.Name
 			} else if comment.CreatorType == "Tutor" {
-				tutor := linkTutortToID(db, comment.CreatorID, tutorList)
+				tutor := linkTutorToID(db, comment.CreatorID, tutorList)
 				comment.CreatorName = tutor.Name
 			}
 		}
@@ -297,12 +298,12 @@ func getTutorComments(db *sql.DB) []Comment {
 				student := linkStudentToID(db, comment.CreatorID, studentList)
 				comment.CreatorName = student.Name
 			} else if comment.CreatorType == "Tutor" {
-				tutor := linkTutortToID(db, comment.CreatorID, tutorList)
-				comment.CreatorName = tutor.Name
+				tutor1 := linkTutorToID(db, comment.CreatorID, tutorList)
+				comment.CreatorName = tutor1.Name
 			}
 		}
-		tutor := linkTutortToID(db, comment.TargetID, tutorList)
-		comment.TargetName = tutor.Name
+		tutor2 := linkTutorToID(db, comment.TargetID, tutorList)
+		comment.TargetName = tutor2.Name
 		fmt.Println(comment)
 		tutorCommentList = append(tutorCommentList, comment)
 

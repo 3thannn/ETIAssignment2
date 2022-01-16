@@ -11,11 +11,43 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <body>
-        
+        <div class="container">
+            <div class="row" >
+                <div class="col-12 pt-5" id="headerDiv" style="text-align: center;">
+                    
+                </div>
+                <div class="col-6 pt-5" style="text-align: center;">
+                    <button class="btn btn-outline-success active" style="font-size:30px; font-weight: bold; width: 200px;" onclick="getStudent()">Comments</button>
+                </div>
+                <div class="col-6 pt-5" style="text-align: center;">
+                    <button class="btn btn-outline-success" style="font-size:30px; font-weight: bold; width: 200px;">Ratings</button>
+                </div>
+            </div>
+            <div id="divContainer" class="mt-4 overflow-auto" style="max-height:35vh;">
+
+            </div>
+            <div>
+                <div class="row mt-3 px-5" id="form">
+                    
+                </div>
+            </div>
+        </div>
     </body>
     <script>
-        getStudent();
-        function getStudent(){
+        url = document.URL;
+        var type = url.substring(url.lastIndexOf('?') + 1);
+        if(type == "Student"){
+            getStudent(type);
+        }
+        $("button").click(function() {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                $(".active").removeClass("active");
+                $(this).addClass('active');
+            }
+        });
+        function getStudent(type){
             url = document.URL;
             var url1 = "http://localhost:5003/api/getstudent";
             var id = url.substring(url.lastIndexOf('=') + 1);
@@ -26,14 +58,14 @@
                 success: function (response, textStatus) {
                     student = JSON.parse(response);
                     console.log(student);
-                    getComments();
+                    getComments(student,type);
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
                 }
             });
         }
-        function getComments(){
+        function getComments(student,type){
             url = document.URL;
             var url1 = "http://localhost:5001/api/comment/student";
             var id = url.substring(url.lastIndexOf('=') + 1);
@@ -44,6 +76,8 @@
                 success: function (response, textStatus) {
                     commentList = JSON.parse(response);
                     console.log(commentList);
+                    displayCommentData(student, commentList, type)
+                    getRatings();
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -51,10 +85,92 @@
             });
         }
         function getRatings(){
-            
+            url = document.URL;
+            var url1 = "http://localhost:5002/api/rating/student";
+            var id = url.substring(url.lastIndexOf('=') + 1);
+            fullurl = url1 + '/' + id;
+            $.ajax({
+                type: "GET",
+                url: fullurl,
+                success: function (response, textStatus) {
+                    ratingList = JSON.parse(response);
+                    console.log(ratingList);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
         }
-        function displayCard(){
+        function displayCommentData(student, commentList, type){
+            url = document.URL;
+            var id = url.substring(url.lastIndexOf('=') + 1);
+            document.getElementById('headerDiv').innerHTML = '';
+            document.getElementById('divContainer').innerHTML = '';
+            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            var headerContent = '<i class="fa fa-user m-4" style="font-size:40px"></i>' + '<span style="font-size:40px; font-weight:bold;">' + student.Name + '</span>'
+            document.getElementById('headerDiv').innerHTML += headerContent;
+            for (i = 0; i < commentList.length; i ++) {
+                object = commentList[i];
+                var commentDate = new Date(object.DateTimePublished);
+                formatedCommentDate = commentDate.toLocaleDateString("en-US", options);
 
+                var creatorName = "";
+                if (object.Anonymous == 1){
+                    creatorName = "Anonymous User"
+                }
+                else{
+                    creatorName = object.CreatorName
+                }
+                var commentData = 
+                '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
+                    '<div class="col-3" style="font-size:20px;">' +
+                        '<span style="font-weight:bold;">' + creatorName + '</span>' + '</br>' +
+                         '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                         '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</span>' +
+                    '</div>' +
+                    '<div class="col-9">' +
+                        object.CommentData  + 
+                    '</div>' + 
+                '</div>' ;
+                document.getElementById('divContainer').innerHTML += commentData;
+            }
+            var formData = '<form id="commentForm" onsubmit="return commentData(this);" style="width: 100%;">' +
+                                ' <div class="form-group pt-3">' +
+                                    '<label for="CreatorType">Creator Type</label>' +
+                                        '<select class="custom-select" name="CreatorType" id="CreatorType">' +
+                                            '<option selected>Choose...</option>' +
+                                            '<option value="Student">Student</option>' +
+                                            '<option value="Class">Class</option>' +
+                                            '<option value="Module">Module</option>' +
+                                            '<option value="Tutor">Tutor</option>' +
+                                        '</select>' +
+                                    '</div>' +
+                                '<div class="form-group">' +
+                                    '<label for="CreatorID">Creator ID</label>' +
+                                    '<input type="number" class="form-control" name="CreatorID" id="CreatorID">' +
+                                 '</div>' +
+                                 '<div class="form-group">' +
+                                    '<input type="text" class="form-control" name="TargetType" id="TargetType" style="display:none;"' + 'value=' + type + '>' +
+                                '</div>' +
+                                '<div class="form-group">'+
+                                    '<input type="number" class="form-control" name="TargetID" id="TargetID" style="display:none;"' + 'value=' + id + '>' +
+                                '</div>' +
+                                '<div class="form-group">' +
+                                    '<label for="commentData">Comment</label>' +
+                                    '<textarea class="form-control" name="CommentData" id="CommentData" placeholder="Enter Your Comment"></textarea>' +
+                                '</div>' +
+                                '<div class="form-check">' +
+                                    '<input class="form-check-input" type="checkbox" value="1" id="Anonymous" name="Anonymous">' +
+                                    '<label class="form-check-label" for="anonymous">' +
+                                        'Anonymous' +
+                                    '</label>' +
+                                '</div>' +        
+                                '</br>'
+                                '<button type="submit" class="btn btn-primary">Submit</button>'
+                                '<a class="btn btn-danger" style="color:white;"' + 'onclick="window.location.href=' + "'../Main/index.html" +"'" + '>Back</a>' +
+                            '</form>'
+                       
+            document.getElementById("form").innerHTML = formData;
         }
     </script>
 </html>

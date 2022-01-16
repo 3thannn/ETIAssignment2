@@ -13,12 +13,12 @@
     <body>
         <div class='container pt-5'>
             <div class="row">
-                <div class="col">
+                <div class="col-12">
                     <h1>Select Type</h1>
                 </div>
             </div>
             <div class="row pt-2">
-                <div class="col-6">
+                <div class="col">
                     <button class="btn btn-outline-success mr-1 active" onclick="getStudents()">Students</button>
                     <button class="btn btn-outline-success mx-1" onclick="getTutors()">Tutors</button>
                     <button class="btn btn-outline-success mx-1" onclick="getModules()">Modules</button>
@@ -42,14 +42,14 @@
         });
         getStudents();
 
-        function displayCards(List){
+        function displayCards(List, objectType){
             for (i = 0; i < List.length; i ++) {
                 object = List[i];
                 var ID = object.ID
                 console.log(ID);
-                var redirectLink = "/C:/projects/src/ETIAssignment2/FrontEnd/Main/details.html?id=" + ID;
+                var redirectLink = "/C:/projects/src/ETIAssignment2/FrontEnd/Main/details.html?id=" + ID + '?' + objectType;
                 console.log(redirectLink);
-                stringdata = '<div class="col-4"' +  'onclick="location' + ".href='" + redirectLink +"';" + '">';
+                stringdata = '<div class="col-lg-4 col-md-6 col-sm-12 pt-3"' +  'onclick="location' + ".href='" + redirectLink +"';" + '">';
                 console.log(stringdata)
                 document.getElementById('userDiv').innerHTML += 
                 stringdata + 
@@ -70,7 +70,7 @@
                 success: function (response, textStatus) {
                     studentList = JSON.parse(response);
                     console.log(studentList);
-                    displayCards(studentList)
+                    displayCards(studentList, "Student")
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -86,7 +86,7 @@
                 success: function (response, textStatus) {
                     tutorList = JSON.parse(response);
                     console.log(tutorList);
-                    displayCards(tutorList)
+                    displayCards(tutorList, "Tutor")
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -102,7 +102,7 @@
                 success: function (response, textStatus) {
                     moduleList = JSON.parse(response);
                     console.log(moduleList);
-                    displayCards(moduleList)
+                    displayCards(moduleListm, "Module")
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -118,7 +118,7 @@
                 success: function (response, textStatus) {
                     classList = JSON.parse(response);
                     console.log(classList);
-                    displayCards(classList)
+                    displayCards(classList, "Class")
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);

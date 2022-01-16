@@ -11,6 +11,8 @@ CREATE TABLE Student(
     
 INSERT INTO Student (StudentID, Name) VALUES (1, 'Ethan');
 INSERT INTO Student (StudentID, Name) VALUES (2, 'Kester');
+INSERT INTO Student (StudentID, Name) VALUES (3, 'Naomi');
+INSERT INTO Student (StudentID, Name) VALUES (4, 'WenWei');
     
 DROP TABLE IF EXISTS Tutor;
 CREATE TABLE Tutor(
@@ -18,11 +20,14 @@ CREATE TABLE Tutor(
 	Name varchar(255) NOT NULL);
 INSERT INTO Tutor (TutorID, Name) VALUES (1, 'Ethan');
 INSERT INTO Tutor (TutorID, Name) VALUES (2, 'Kester');
+INSERT INTO Tutor (TutorID, Name) VALUES (3, 'Naomi');
+INSERT INTO Tutor (TutorID, Name) VALUES (4, 'WenWei');
 
 DROP TABLE IF EXISTS Class;
 CREATE TABLE Class(
 	ClassID int NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	Name varchar(255) NOT NULL);
+    
 
 INSERT INTO Class (ClassID, Name) VALUES (1, 'T01');
 INSERT INTO Class (ClassID, Name) VALUES (2, 'T02');
