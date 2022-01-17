@@ -48,7 +48,6 @@ func getAllStudents(db *sql.DB) []Object {
 			fmt.Println("202 - Successfully received Students!")
 		}
 	}
-	fmt.Println(studentList)
 	return studentList
 }
 
@@ -438,6 +437,63 @@ func studentRatings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func tutorRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	params := mux.Vars(r)
+	tutorID := params["tutorid"]
+	tutorIDint, err := strconv.Atoi(tutorID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		tutorRatingList := getTutorRatings(db, tutorIDint)
+		if len(tutorRatingList) > 0 {
+			fmt.Println(tutorRatingList)
+			json.NewEncoder(w).Encode(tutorRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func classRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	params := mux.Vars(r)
+	classID := params["classid"]
+	classIDint, err := strconv.Atoi(classID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		classRatingList := getClassRatings(db, classIDint)
+		if len(classRatingList) > 0 {
+			fmt.Println(classRatingList)
+			json.NewEncoder(w).Encode(classRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func moduleRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	params := mux.Vars(r)
+	moduleID := params["moduleid"]
+	moduleIDint, err := strconv.Atoi(moduleID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		moduleRatingList := getModuleRatings(db, moduleIDint)
+		if len(moduleRatingList) > 0 {
+			fmt.Println(moduleRatingList)
+			json.NewEncoder(w).Encode(moduleRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
 func testcode(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		json.NewEncoder(w).Encode("Hello this is a pass")
@@ -457,6 +513,12 @@ func main() {
 	router.HandleFunc("/api/rating", rating).Methods("POST", "PUT")
 
 	router.HandleFunc("/api/rating/student/{studentid}", studentRatings).Methods("GET")
+
+	router.HandleFunc("/api/rating/tutor/{tutorid}", tutorRatings).Methods("GET")
+
+	router.HandleFunc("/api/rating/class/{classid}", classRatings).Methods("GET")
+
+	router.HandleFunc("/api/rating/module/{moduleid}", moduleRatings).Methods("GET")
 
 	// router.HandleFunc("/api/Rating/student/sent/{CreatorID}", postedRatings).Methods("GET")
 

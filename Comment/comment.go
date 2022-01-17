@@ -210,11 +210,11 @@ func getStudentComments(db *sql.DB, targetID int) []Comment {
 
 //3.9.1 View comments
 //Get all comments to classes
-func getClassComments(db *sql.DB) []Comment {
+func getClassComments(db *sql.DB, targetID int) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	classList := getAllClasses(db)
-	classQuery := "SELECT * FROM Comment WHERE TargetType = 'Class';"
+	classQuery := fmt.Sprintf("SELECT * FROM Comment WHERE TargetType = 'Class'; AND TargetID = '%d'", targetID)
 
 	classResults, err := db.Query(classQuery)
 	if err != nil {
@@ -245,11 +245,11 @@ func getClassComments(db *sql.DB) []Comment {
 
 //3.9.1 View comments
 //Get all comments to modules
-func getModuleComments(db *sql.DB) []Comment {
+func getModuleComments(db *sql.DB, targetID int) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
-	moduleQuery := "SELECT * FROM Comment WHERE TargetType = 'Module';"
+	moduleQuery := fmt.Sprintf("SELECT * FROM Comment WHERE TargetType = 'Module'; AND TargetID = '%d'", targetID)
 
 	moduleResults, err := db.Query(moduleQuery)
 	if err != nil {
@@ -280,12 +280,14 @@ func getModuleComments(db *sql.DB) []Comment {
 
 //3.9.1 View comments
 //Get all comments to Tutors
-func getTutorComments(db *sql.DB) []Comment {
+func getTutorComments(db *sql.DB, targetID int) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
-	tutorQuery := "SELECT * FROM Comment WHERE TargetType = 'Tutor';"
+	fmt.Println(studentList)
+	fmt.Println(tutorList)
+	tutorquery := fmt.Sprintf("SELECT * FROM Comment WHERE TargetType = 'Tutor' AND TargetID = '%d';", targetID)
 
-	tutorResults, err := db.Query(tutorQuery)
+	tutorResults, err := db.Query(tutorquery)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -293,20 +295,22 @@ func getTutorComments(db *sql.DB) []Comment {
 	for tutorResults.Next() {
 		var comment Comment
 		tutorResults.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
+		fmt.Print(comment)
 		if comment.Anonymous == 0 {
 			if comment.CreatorType == "Student" {
 				student := linkStudentToID(db, comment.CreatorID, studentList)
 				comment.CreatorName = student.Name
+				println(student.Name)
 			} else if comment.CreatorType == "Tutor" {
-				tutor1 := linkTutorToID(db, comment.CreatorID, tutorList)
-				comment.CreatorName = tutor1.Name
+				tutor := linkTutorToID(db, comment.CreatorID, tutorList)
+				comment.CreatorName = tutor.Name
+				println(tutor.Name)
 			}
 		}
-		tutor2 := linkTutorToID(db, comment.TargetID, tutorList)
-		comment.TargetName = tutor2.Name
+		tutor := linkTutorToID(db, comment.TargetID, tutorList)
+		comment.TargetName = tutor.Name
 		fmt.Println(comment)
 		tutorCommentList = append(tutorCommentList, comment)
-
 	}
 
 	return tutorCommentList
@@ -414,8 +418,14 @@ func tutorComments(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
+	params := mux.Vars(r)
+	tutorID := params["tutorid"]
+	tutorIDint, err := strconv.Atoi(tutorID)
+	if err != nil {
+		panic(err.Error())
+	}
 	if r.Method == "GET" {
-		tutorCommentList := getTutorComments(db)
+		tutorCommentList := getTutorComments(db, tutorIDint)
 		if len(tutorCommentList) > 0 {
 			fmt.Println(tutorCommentList)
 			json.NewEncoder(w).Encode(tutorCommentList)
@@ -430,9 +440,15 @@ func classComments(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
+	params := mux.Vars(r)
+	classID := params["classid"]
+	classIDint, err := strconv.Atoi(classID)
+	if err != nil {
+		panic(err.Error())
+	}
 	// handle error
 	if r.Method == "GET" {
-		classCommentList := getClassComments(db)
+		classCommentList := getClassComments(db, classIDint)
 		if len(classCommentList) > 0 {
 			fmt.Println(classCommentList)
 			json.NewEncoder(w).Encode(classCommentList)
@@ -446,8 +462,14 @@ func moduleComments(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
+	params := mux.Vars(r)
+	moduleID := params["moduleid"]
+	moduleIDint, err := strconv.Atoi(moduleID)
+	if err != nil {
+		panic(err.Error())
+	}
 	if r.Method == "GET" {
-		moduleCommentList := getModuleComments(db)
+		moduleCommentList := getModuleComments(db, moduleIDint)
 		if len(moduleCommentList) > 0 {
 			fmt.Println(moduleCommentList)
 			json.NewEncoder(w).Encode(moduleCommentList)
@@ -533,11 +555,11 @@ func main() {
 
 	router.HandleFunc("/api/comment/student/{studentid}", studentComments).Methods("GET")
 
-	router.HandleFunc("/api/comment/tutor", tutorComments).Methods("GET")
+	router.HandleFunc("/api/comment/tutor/{tutorid}", tutorComments).Methods("GET")
 
-	router.HandleFunc("/api/comment/class", classComments).Methods("GET")
+	router.HandleFunc("/api/comment/class/{classid}", classComments).Methods("GET")
 
-	router.HandleFunc("/api/comment/module", moduleComments).Methods("GET")
+	router.HandleFunc("/api/comment/module/{moduleid}", moduleComments).Methods("GET")
 
 	// router.HandleFunc("/api/comment/student/sent/{CreatorID}", postedComments).Methods("GET")
 

@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Select Type</title>
+        <title>Object Details</title>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -41,9 +41,19 @@
             getStudent("comments");
         }
         else if(type == "Tutor"){
-            document.getElementById('commentsButton').setAttribute("onclick", 'getTutor(type,"comments")');
-            document.getElementById('ratingsButton').setAttribute("onclick", 'getTutor(type,"ratings")');
+            document.getElementById('commentsButton').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getTutor(' + "'comments'" + ')"' + '>Comments</button>';
+            document.getElementById('ratingsButton').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getTutor(' + "'ratings'" + ')"' + '>Ratings</button>';
             getTutor("comments");
+        }
+        else if(type == "Class"){
+            document.getElementById('commentsButton').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getClass(' + "'comments'" + ')"' + '>Comments</button>';
+            document.getElementById('ratingsButton').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getClass(' + "'ratings'" + ')"' + '>Ratings</button>';
+            getClass("comments");
+        }
+        else if(type == "Module"){
+            document.getElementById('commentsButton').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getModule(' + "'comments'" + ')"' + '>Comments</button>';
+            document.getElementById('ratingsButton').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getModule(' + "'ratings'" + ')"' + '>Ratings</button>';
+            getModule("comments");
         }
         $("button").click(function() {
             if ($(this).hasClass("active")) {
@@ -89,12 +99,60 @@
                 url: fullurl,
                 success: function (response, textStatus) {
                     tutor = JSON.parse(response);
-                    console.log(student);
+                    console.log(tutor);
                     if(displayChoice == "comments"){
                         getComments(tutor);
                     }
                     else{
                         getRatings(tutor);
+                    }
+                    
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
+        }
+        function getModule(displayChoice){
+            url = document.URL;
+            var url1 = "http://localhost:5005/api/getmodule";
+            var id = url.substring(url.lastIndexOf('=') + 1)[0];
+            fullurl = url1 + '/' + id;
+            $.ajax({
+                type: "GET",
+                url: fullurl,
+                success: function (response, textStatus) {
+                    module = JSON.parse(response);
+                    console.log(module);
+                    if(displayChoice == "comments"){
+                        getComments(module);
+                    }
+                    else{
+                        getRatings(module);
+                    }
+                    
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                }
+            });
+        }
+        function getClass(displayChoice){
+            url = document.URL;
+            var url1 = "http://localhost:5006/api/getclass";
+            var id = url.substring(url.lastIndexOf('=') + 1)[0];
+            fullurl = url1 + '/' + id;
+            $.ajax({
+                type: "GET",
+                url: fullurl,
+                success: function (response, textStatus) {
+                    classObject = JSON.parse(response);
+                    console.log(classObject);
+                    if(displayChoice == "comments"){
+                        getComments(classObject);
+                    }
+                    else{
+                        getRatings(classObject);
                     }
                     
                 },
@@ -120,9 +178,12 @@
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
+                    commentList = [];
+                    displayCommentData(object, commentList, type);
                 }
             });
         }
+        
         function getRatings(object){
             console.log("runs getRating");
             url = document.URL;
@@ -142,6 +203,8 @@
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
+                    ratingList = [];
+                    displayRatingData(object, ratingList, type);
                 }
             });
         }
@@ -150,36 +213,41 @@
             url = document.URL;
             var id = (url.substring(url.lastIndexOf('=') + 1))[0];
             document.getElementById('headerDiv').innerHTML = '';
-            document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">All Comments</h2>';
-            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             var headerContent = '<i class="fa fa-user m-4" style="font-size:40px"></i>' + '<span style="font-size:40px; font-weight:bold;">' + object.Name + '</span>';
-            document.getElementById('headerDiv').innerHTML += headerContent;
-            for (i = 0; i < commentList.length; i ++) {
-                object = commentList[i];
-                var commentDate = new Date(object.DateTimePublished);
-                formatedCommentDate = commentDate.toLocaleDateString("en-US", options);
-                formatedCommentTime = commentDate.toLocaleTimeString("en-US");
-                var creatorName = "";
-                if (object.Anonymous == 1){
-                    creatorName = "Anonymous User";
-                }
-                else{
-                    creatorName = object.CreatorName;
-                }
-                var commentData = 
-                '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
-                    '<div class="col-4">' +
-                        '<span style="font-weight:bold; font-size:20px;">' + creatorName + '</span>' + '</br>' +
-                        '<span style="font-weight:bold; font-size:15px; color:grey">' + object.CreatorType  + '</span>' + '</br>' +
-                        '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
-                        '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</br>' + formatedCommentTime + '</span>' +
-                    '</div>' +
-                    '<div class="col-8">' +
-                        object.CommentData  + 
-                    '</div>' + 
-                '</div>' ;
-                document.getElementById('divContainer').innerHTML += commentData;
+                document.getElementById('headerDiv').innerHTML += headerContent;
+            if (commentList.length == 0){
+                document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">No Comments!</h2>';
             }
+            else{
+                document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">All Comments</h2>';
+                var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                for (i = 0; i < commentList.length; i ++) {
+                    object = commentList[i];
+                    var commentDate = new Date(object.DateTimePublished);
+                    formatedCommentDate = commentDate.toLocaleDateString("en-US", options);
+                    formatedCommentTime = commentDate.toLocaleTimeString("en-US");
+                    var creatorName = "";
+                    if (object.Anonymous == 1){
+                        creatorName = "Anonymous User";
+                    }
+                    else{
+                        creatorName = object.CreatorName;
+                    }
+                    var commentData = 
+                    '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
+                        '<div class="col-4">' +
+                            '<span style="font-weight:bold; font-size:20px;">' + creatorName + '</span>' + '</br>' +
+                            '<span style="font-weight:bold; font-size:15px; color:grey">' + object.CreatorType  + '</span>' + '</br>' +
+                            '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                            '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</br>' + formatedCommentTime + '</span>' +
+                        '</div>' +
+                        '<div class="col-8">' +
+                            object.CommentData  + 
+                        '</div>' + 
+                    '</div>' ;
+                    document.getElementById('divContainer').innerHTML += commentData;
+                }
+            }            
             var formData = '<h2>Create New Comment</h2>' +
                             '<form id="commentForm" onsubmit="return createdCommentData(this);" style="width: 100%;">' +
                                 ' <div class="form-group"  style="display:none;">' +
@@ -246,50 +314,55 @@
         function displayRatingData(object, ratingList, type){
             console.log("runs displayRatingData");
             console.log(ratingList);
-            url = document.URL;
-            var id = (url.substring(url.lastIndexOf('=') + 1))[0];
             document.getElementById('headerDiv').innerHTML = '';
-            document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">All Ratings</h2>';
-            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             var headerContent = '<i class="fa fa-user m-4" style="font-size:40px"></i>' + '<span style="font-size:40px; font-weight:bold;">' + object.Name + '</span>';
             document.getElementById('headerDiv').innerHTML += headerContent;
-            console.log(ratingList.length);
-            for (a = 0; a < ratingList.length; a++) {
-                console.log("a = " + a);
-                object = ratingList[a];
-                console.log(object);
-                var ratingDate = new Date(object.DateTimePublished);
-                formatedRatingDate = ratingDate.toLocaleDateString("en-US", options);
-                formatedRatingTime = ratingDate.toLocaleTimeString("en-US");
-                var creatorName = "";
-                if (object.Anonymous == 1){
-                    creatorName = "Anonymous User";
+            if (ratingList.length == 0){
+                document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">No Ratings!</h2>';
+            }
+            else{
+                url = document.URL;
+                var id = (url.substring(url.lastIndexOf('=') + 1))[0];
+                document.getElementById('divContainer').innerHTML = '<h2 style="text-align:center;">All Ratings</h2>';
+                var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                console.log(ratingList.length);
+                for (a = 0; a < ratingList.length; a++) {
+                    console.log("a = " + a);
+                    object = ratingList[a];
+                    console.log(object);
+                    var ratingDate = new Date(object.DateTimePublished);
+                    formatedRatingDate = ratingDate.toLocaleDateString("en-US", options);
+                    formatedRatingTime = ratingDate.toLocaleTimeString("en-US");
+                    var creatorName = "";
+                    if (object.Anonymous == 1){
+                        creatorName = "Anonymous User";
+                    }
+                    else{
+                        creatorName = object.CreatorName;
+                    }
+                    var colID = "ratingData" + a;
+                    var ratingData = 
+                    '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
+                        '<div class="col-4">' +
+                            '<span style="font-weight:bold; font-size:20px;">' + creatorName + '</span>' + '</br>' +
+                            '<span style="font-weight:bold; font-size:15px; color:grey">' + object.CreatorType  + '</span>' + '</br>' +
+                            '<span style="font-size:13px;">' +  'Rated At:' + '</span>' + '</br>' + 
+                            '<span style="font-size:13px; font-style:italic;">' + formatedRatingDate + '</br>' + formatedRatingTime + '</span>' +
+                        '</div>' +
+                        '<div class="col-8" id="' + colID + '">' +
+                        '</div>' + 
+                    '</div>' ;
+                    document.getElementById('divContainer').innerHTML += ratingData;
+                    for (y = 0; y < parseInt(object.RatingScore); y++){
+                        document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
+                    }
+                    var remainingStars = (5 - parseInt(object.RatingScore));
+                    console.log("remaining stars = " + remainingStars);
+                    for (y = 0; y < remainingStars; y++){
+                        document.getElementById(colID).innerHTML += '<i class="fa fa-star-o" style="font-size:30px"></i>'
+                    }
+                    
                 }
-                else{
-                    creatorName = object.CreatorName;
-                }
-                var colID = "ratingData" + a;
-                var ratingData = 
-                '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
-                    '<div class="col-4">' +
-                        '<span style="font-weight:bold; font-size:20px;">' + creatorName + '</span>' + '</br>' +
-                        '<span style="font-weight:bold; font-size:15px; color:grey">' + object.CreatorType  + '</span>' + '</br>' +
-                        '<span style="font-size:13px;">' +  'Rated At:' + '</span>' + '</br>' + 
-                        '<span style="font-size:13px; font-style:italic;">' + formatedRatingDate + '</br>' + formatedRatingTime + '</span>' +
-                    '</div>' +
-                    '<div class="col-8" id="' + colID + '">' +
-                    '</div>' + 
-                '</div>' ;
-                document.getElementById('divContainer').innerHTML += ratingData;
-                for (y = 0; y < parseInt(object.RatingScore); y++){
-                    document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
-                }
-                var remainingStars = (5 - parseInt(object.RatingScore));
-                console.log("remaining stars = " + remainingStars);
-                for (y = 0; y < remainingStars; y++){
-                    document.getElementById(colID).innerHTML += '<i class="fa fa-star-o" style="font-size:30px"></i>'
-                }
-                
             }
             var formData = '<h2>Create New Rating</h2>' +
                             '<form id="ratingForm" onsubmit="return createdRatingData(this);" style="width: 100%;">' +
@@ -345,7 +418,7 @@
                                     '<input class="form-check-input" type="checkbox" value="1" id="Anonymous" name="Anonymous">' +
                                     '<label class="form-check-label" for="anonymous">' +
                                         'Anonymous' +
-                                    '</label>' +
+                                    '</label>' + 
                                 '</div>' +        
                                 '</br>' +
                                 '<button type="submit" class="btn btn-primary">Submit</button>' +

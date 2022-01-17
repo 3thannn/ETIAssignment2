@@ -15,22 +15,20 @@ CREATE TABLE Comment(
 	Anonymous bool NOT NULL DEFAULT False,
 	DateTimePublished datetime);
     
-INSERT INTO Comments(CommentData, CreatorID, CreatorType, receiverId, receiverType, datetime, anonymous) 
+INSERT INTO Comment(CommentData, CreatorID, CreatorType, TargetID, TargetType, DateTimePublished, Anonymous) 
 VALUES
-("Great at working in teams.", "fwna55ir8hqo57xl", "Student", "zv04w3y2tlcn5hj1", "Student", NOW(), false),
-("Great team player.", "9e8uqiz7xat21opf", "Student", "zv04w3y2tlcn5hj1", "Student", NOW(), false),
-("Great classmate.", "w8zuzvgadqbuift3", "Student", "zv04w3y2tlcn5hj1", "Student", NOW(), true),
-("Hands up work on time.", "g8m1ce47c43blq0n", "Tutor", "zv04w3y2tlcn5hj1", "Student", NOW(), true),
-("Good student.", "eg05suc92vnad01m", "Tutor", "zv04w3y2tlcn5hj1", "Student", NOW(), false),
+("Great at working in teams.", 1, "Student", 2, "Student", NOW(), false),
+("Great team player.", 2, "Student", 1, "Student", NOW(), false),
+("Great classmate.", 3, "Student", 1, "Student", NOW(), true),
+("Hands up work on time.", 4, "Tutor", 1, "Student", NOW(), true),
+("Good student.", 3, "Tutor", 2, "Student", NOW(), false),
+("Fun to teach!", 2, "Tutor", 1, "Student", NOW(), false);
 
-("Awesome table partner.", "zv04w3y2tlcn5hj1", "Student", "fwna55ir8hqo57xl", "Student", NOW(), false),
-("Has great leadership.", "9e8uqiz7xat21opf", "Student", "fwna55ir8hqo57xl", "Student", NOW(), false),
-("Best CCA captain.", "w8zuzvgadqbuift3", "Student", "fwna55ir8hqo57xl", "Student", NOW(), true),
-("Hands up work on time.", "g8m1ce47c43blq0n", "Tutor", "zv04w3y2tlcn5hj1", "Student", NOW(), true),
-("Good student.", "eg05suc92vnad01m", "Tutor", "zv04w3y2tlcn5hj1", "Student", NOW(), false),
 
-("Nice person to talk to.", "zv04w3y2tlcn5hj1", "Student", "9e8uqiz7xat21opf", "Student", NOW(), false),
-("Love this person's personality.", "fwna55ir8hqo57xl", "Student", "9e8uqiz7xat21opf", "Student", NOW(), false),
-("Great attitude.", "w8zuzvgadqbuift3", "Student", "9e8uqiz7xat21opf", "Student", NOW(), true),
-("Hands up work on time.", "g8m1ce47c43blq0n", "Tutor", "zv04w3y2tlcn5hj1", "Student", NOW(), true),
-("Good student.", "eg05suc92vnad01m", "Tutor", "zv04w3y2tlcn5hj1", "Student", NOW(), false);
+INSERT INTO Comment(CommentData, CreatorID, CreatorType, TargetID, TargetType, DateTimePublished, Anonymous) 
+VALUES
+("Patient and caring tutor.", 1, "Student", 2, "Tutor", NOW(), false),
+("This Class is awesome!.", 3, "Student", 1, "Class", NOW(), false),
+("This class is very lively, It's a pleasure to teach you guys.", 2, "Tutor", 2, "Class", NOW(), true),
+("Module is fun and interesting!", 4, "Student", 1, "Module", NOW(), true),
+("Moddule is really difficult but I enjoy learning it!.", 2, "Student", 1, "Module", NOW(), false);
