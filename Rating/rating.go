@@ -128,7 +128,7 @@ func linkTutorToID(db *sql.DB, id int, tutorList []Object) Object {
 	return tutor
 }
 
-func linkClasstToID(db *sql.DB, id int, classList []Object) Object {
+func linkClassToID(db *sql.DB, id int, classList []Object) Object {
 	var class Object
 	for _, class := range classList {
 		if class.ID == id {
@@ -199,7 +199,7 @@ func getClassRatings(db *sql.DB, targetID int) []Rating {
 				rating.CreatorName = tutor.Name
 			}
 		}
-		class := linkClasstToID(db, rating.TargetID, classList)
+		class := linkClassToID(db, rating.TargetID, classList)
 		rating.TargetName = class.Name
 		fmt.Println(rating)
 		classRatingList = append(classRatingList, rating)
@@ -324,6 +324,94 @@ func updateRecord(db *sql.DB, Rating Rating) {
 	}
 }
 
+func studentRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	studentID := params["studentid"]
+	studentIDint, err := strconv.Atoi(studentID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		studentRatingList := getStudentRatings(db, studentIDint)
+		if len(studentRatingList) > 0 {
+			fmt.Println(studentRatingList)
+			json.NewEncoder(w).Encode(studentRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func tutorRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	tutorID := params["tutorid"]
+	tutorIDint, err := strconv.Atoi(tutorID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		tutorRatingList := getTutorRatings(db, tutorIDint)
+		if len(tutorRatingList) > 0 {
+			fmt.Println(tutorRatingList)
+			json.NewEncoder(w).Encode(tutorRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func classRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	classID := params["classid"]
+	classIDint, err := strconv.Atoi(classID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		classRatingList := getClassRatings(db, classIDint)
+		if len(classRatingList) > 0 {
+			fmt.Println(classRatingList)
+			json.NewEncoder(w).Encode(classRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func moduleRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	moduleID := params["moduleid"]
+	moduleIDint, err := strconv.Atoi(moduleID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		moduleRatingList := getModuleRatings(db, moduleIDint)
+		if len(moduleRatingList) > 0 {
+			fmt.Println(moduleRatingList)
+			json.NewEncoder(w).Encode(moduleRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
 func rating(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
 	// handle error
@@ -414,82 +502,6 @@ func postedStudentRatings(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
-		}
-	}
-}
-
-func studentRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
-	params := mux.Vars(r)
-	studentID := params["studentid"]
-	studentIDint, err := strconv.Atoi(studentID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		studentRatingList := getStudentRatings(db, studentIDint)
-		if len(studentRatingList) > 0 {
-			fmt.Println(studentRatingList)
-			json.NewEncoder(w).Encode(studentRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func tutorRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
-	params := mux.Vars(r)
-	tutorID := params["tutorid"]
-	tutorIDint, err := strconv.Atoi(tutorID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		tutorRatingList := getTutorRatings(db, tutorIDint)
-		if len(tutorRatingList) > 0 {
-			fmt.Println(tutorRatingList)
-			json.NewEncoder(w).Encode(tutorRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func classRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
-	params := mux.Vars(r)
-	classID := params["classid"]
-	classIDint, err := strconv.Atoi(classID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		classRatingList := getClassRatings(db, classIDint)
-		if len(classRatingList) > 0 {
-			fmt.Println(classRatingList)
-			json.NewEncoder(w).Encode(classRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func moduleRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
-	params := mux.Vars(r)
-	moduleID := params["moduleid"]
-	moduleIDint, err := strconv.Atoi(moduleID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		moduleRatingList := getModuleRatings(db, moduleIDint)
-		if len(moduleRatingList) > 0 {
-			fmt.Println(moduleRatingList)
-			json.NewEncoder(w).Encode(moduleRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
 		}
 	}
 }
