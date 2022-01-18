@@ -1,4 +1,4 @@
-module exmplae.com
+module example.go
 
 go 1.17
 

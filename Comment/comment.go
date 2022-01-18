@@ -12,7 +12,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/julienschmidt/httprouter"
 )
 
 type Comment struct {
@@ -532,16 +531,21 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment 
 }
 
 //Get all comments received
-func receivedComments(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func receivedComments(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
-	TargetType := params.ByName("type")
-	TargetID := params.ByName("id")
+	params := mux.Vars(r)
+	TargetType := params["type"]
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
+	}
 	if r.Method == "GET" {
 		if err == nil {
-			var personalComments []Comment = getReceivedComments(db, TargetType, TargetID)
+			var personalComments []Comment = getReceivedComments(db, TargetType, TargetIDInt)
 			if len(personalComments) > 0 {
 				fmt.Println(personalComments)
 				json.NewEncoder(w).Encode(personalComments)
@@ -555,16 +559,21 @@ func receivedComments(w http.ResponseWriter, r *http.Request, params httprouter.
 }
 
 //Get all comments received
-func postedComments(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func postedComments(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
-	TargetType := params.ByName("type")
-	TargetID := params.ByName("id")
+	params := mux.Vars(r)
+	TargetType := params["type"]
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
+	}
 	if r.Method == "GET" {
 		if err == nil {
-			var personalComments []Comment = getReceivedComments(db, TargetType, TargetID)
+			var personalComments []Comment = getReceivedComments(db, TargetType, TargetIDInt)
 			if len(personalComments) > 0 {
 				fmt.Println(personalComments)
 				json.NewEncoder(w).Encode(personalComments)
@@ -595,9 +604,9 @@ func main() {
 
 	router.HandleFunc("/api/comment", comment).Methods("POST", "PUT")
 
-	router.HandleFunc("/api/mycomments/", receivedComments).Methods("GET")
+	router.HandleFunc("/api/mycomments/?=type={type}&id={id}", receivedComments).Methods("GET")
 
-	router.HandleFunc("/api/postedcomments/", receivedComments).Methods("GET")
+	router.HandleFunc("/api/postedcomments/?=type={type}&id={id}", postedComments).Methods("GET")
 
 	router.HandleFunc("/api/comment/student/{studentid}", studentComments).Methods("GET")
 
