@@ -66,8 +66,9 @@
         function getStudent(displayChoice){
             console.log("runs getStudent");
             url = document.URL;
+            let params = (new URL(url)).searchParams;
+            var id = params.get('id');
             var url1 = "http://localhost:5003/api/getstudent";
-            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -91,8 +92,9 @@
         }
         function getTutor(displayChoice){
             url = document.URL;
+            let params = (new URL(url)).searchParams;
+            var id = params.get('id');
             var url1 = "http://localhost:5004/api/gettutor";
-            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -115,8 +117,9 @@
         }
         function getModule(displayChoice){
             url = document.URL;
+            let params = (new URL(url)).searchParams;
+            var id = params.get('id');
             var url1 = "http://localhost:5005/api/getmodule";
-            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -139,8 +142,9 @@
         }
         function getClass(displayChoice){
             url = document.URL;
+            let params = (new URL(url)).searchParams;
+            var id = params.get('id');
             var url1 = "http://localhost:5006/api/getclass";
-            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -164,9 +168,10 @@
         function getComments(object){
             console.log("runs getComments");
             url = document.URL;
-            var type = url.substring(url.lastIndexOf('?') + 1);
+            let params = (new URL(url)).searchParams;
+            var type = params.get('type');
+            var id = params.get('id');
             var url1 = "http://localhost:5001/api/comment/" + type.toLowerCase();
-            var id = url.substring(url.lastIndexOf('=') + 1)[0];
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -187,9 +192,10 @@
         function getRatings(object){
             console.log("runs getRating");
             url = document.URL;
-            var type = url.substring(url.lastIndexOf('?') + 1);
+            let params = (new URL(url)).searchParams;
+            var type = params.get('type');
+            var id = params.get('id');
             var url1 = "http://localhost:5002/api/rating/" + type.toLowerCase();
-            var id = (url.substring(url.lastIndexOf('=') + 1))[0];
             fullurl = url1 + '/' + id;
             console.log(fullurl);
             $.ajax({
@@ -327,7 +333,6 @@
                 var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 console.log(ratingList.length);
                 for (a = 0; a < ratingList.length; a++) {
-                    console.log("a = " + a);
                     object = ratingList[a];
                     console.log(object);
                     var ratingDate = new Date(object.DateTimePublished);

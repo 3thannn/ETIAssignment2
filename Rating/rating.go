@@ -71,7 +71,7 @@ func getAllTutors(db *sql.DB) []Object {
 }
 
 func getAllClasses(db *sql.DB) []Object {
-	url := "http://localhost:5005/api/class"
+	url := "http://localhost:5006/api/class"
 	response, err := http.Get(url)
 	var classList []Object
 	if err != nil {
@@ -90,7 +90,7 @@ func getAllClasses(db *sql.DB) []Object {
 }
 
 func getAllModules(db *sql.DB) []Object {
-	url := "http://localhost:5006/api/module"
+	url := "http://localhost:5005/api/module"
 	response, err := http.Get(url)
 	var moduleList []Object
 	if err != nil {
@@ -266,64 +266,6 @@ func getTutorRatings(db *sql.DB, targetID int) []Rating {
 	return tutorRatingList
 }
 
-//Get all Ratings received
-func getReceivedRatings(db *sql.DB, CreatorID int) []Rating {
-	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%i' AND TargetType = Student", CreatorID)
-	results, err := db.Query(query)
-	if err != nil {
-		panic(err.Error())
-	}
-	var RatingList []Rating
-	for results.Next() {
-		var Rating Rating
-		results.Scan(&Rating.RatingID, &Rating.CreatorID, &Rating.CreatorType, &Rating.TargetID, &Rating.TargetType, &Rating.RatingScore, &Rating.Anonymous, Rating.DateTimePublished)
-		RatingList = append(RatingList, Rating)
-	}
-	return RatingList
-}
-
-func postRating(db *sql.DB, Rating Rating) {
-	CreatorID := Rating.CreatorID
-	println(Rating.CreatorID)
-	CreatorType := Rating.CreatorType
-	println(Rating.CreatorType)
-	TargetID := Rating.TargetID
-	println(Rating.TargetID)
-	RatingScore := Rating.RatingScore
-	println(Rating.RatingScore)
-	Anonymous := Rating.Anonymous
-	println(Rating.Anonymous)
-	TargetType := Rating.TargetType
-
-	query := fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous, DateTimePublished) VALUES ('%d', '%s', '%d', '%s', '%d', '%b', NOW())",
-		CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
-	_, err := db.Query(query) //Run Query
-
-	if err != nil {
-		panic(err.Error())
-	}
-}
-
-func updateRecord(db *sql.DB, Rating Rating) {
-	RatingID := Rating.RatingID
-	RatingScore := Rating.RatingScore
-	query := ""
-	if Rating.TargetType == "Student" {
-		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Student", RatingScore, RatingID)
-	} else if Rating.TargetType == "Class" {
-		query = fmt.Sprintf("UPDATE  Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Class", RatingScore, RatingID)
-	} else if Rating.TargetType == "Module" {
-		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Module", RatingScore, RatingID)
-	} else if Rating.TargetType == "Tutor" {
-		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Tutor", RatingScore, RatingID)
-	}
-	_, err := db.Query(query) //Run Query
-
-	if err != nil {
-		panic(err.Error())
-	}
-}
-
 func studentRatings(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
 	if err != nil {
@@ -412,6 +354,133 @@ func moduleRatings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Get all Ratings posted
+func getPostedRatings(db *sql.DB, CreatorType string, CreatorID int) []Rating {
+	fmt.Println("this ran here!")
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	var RatingList []Rating
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%d' AND CreatorType = '%s'", CreatorID, CreatorType)
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	for results.Next() {
+		var rating Rating
+		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		if rating.CreatorType == "Student" {
+			student := linkStudentToID(db, rating.CreatorID, studentList)
+			rating.CreatorName = student.Name
+			println(student.Name)
+		} else if rating.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+			rating.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if rating.TargetType == "Student" {
+			student := linkStudentToID(db, rating.TargetID, studentList)
+			rating.TargetName = student.Name
+		} else if rating.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, rating.TargetID, tutorList)
+			rating.TargetName = tutor.Name
+		} else if rating.TargetType == "Module" {
+			module := linkModuleToID(db, rating.TargetID, moduleList)
+			rating.TargetName = module.Name
+		} else if rating.TargetType == "Class" {
+			class := linkClassToID(db, rating.TargetID, classList)
+			rating.TargetName = class.Name
+		}
+		RatingList = append(RatingList, rating)
+	}
+	return RatingList
+}
+
+//Get all Ratings received
+func getReceivedRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	var RatingList []Rating
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%d' AND TargetType = '%s'", TargetID, TargetType)
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	for results.Next() {
+		var rating Rating
+		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		if rating.CreatorType == "Student" {
+			student := linkStudentToID(db, rating.CreatorID, studentList)
+			rating.CreatorName = student.Name
+			println(student.Name)
+		} else if rating.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+			rating.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if rating.TargetType == "Student" {
+			student := linkStudentToID(db, rating.TargetID, studentList)
+			rating.TargetName = student.Name
+		} else if rating.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, rating.TargetID, tutorList)
+			rating.TargetName = tutor.Name
+		} else if rating.TargetType == "Module" {
+			module := linkModuleToID(db, rating.TargetID, moduleList)
+			rating.TargetName = module.Name
+		} else if rating.TargetType == "Class" {
+			class := linkClassToID(db, rating.TargetID, classList)
+			rating.TargetName = class.Name
+		}
+		RatingList = append(RatingList, rating)
+	}
+	return RatingList
+}
+
+func postRating(db *sql.DB, rating Rating) {
+	CreatorID := rating.CreatorID
+	println(rating.CreatorID)
+	CreatorType := rating.CreatorType
+	println(rating.CreatorType)
+	TargetID := rating.TargetID
+	println(rating.TargetID)
+	RatingScore := rating.RatingScore
+	println(rating.RatingScore)
+	Anonymous := rating.Anonymous
+	println(rating.Anonymous)
+	TargetType := rating.TargetType
+
+	query := fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous, DateTimePublished) VALUES ('%d', '%s', '%d', '%s', '%d', '%b', NOW())",
+		CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
+	_, err := db.Query(query) //Run Query
+
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+// func updateRecord(db *sql.DB, Rating Rating) {
+// 	RatingID := Rating.RatingID
+// 	RatingScore := Rating.RatingScore
+// 	query := ""
+// 	if Rating.TargetType == "Student" {
+// 		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Student", RatingScore, RatingID)
+// 	} else if Rating.TargetType == "Class" {
+// 		query = fmt.Sprintf("UPDATE  Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Class", RatingScore, RatingID)
+// 	} else if Rating.TargetType == "Module" {
+// 		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Module", RatingScore, RatingID)
+// 	} else if Rating.TargetType == "Tutor" {
+// 		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Tutor", RatingScore, RatingID)
+// 	}
+// 	_, err := db.Query(query) //Run Query
+
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// }
+
 func rating(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
 	// handle error
@@ -436,20 +505,25 @@ func rating(w http.ResponseWriter, r *http.Request) {
 
 //Get all Ratings received
 func receivedRatings(w http.ResponseWriter, r *http.Request) {
+	println("This ran in receivedRatings")
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
 	// handle error
 	if err != nil {
 		panic(err.Error())
 	}
 	params := mux.Vars(r)
-	CreatorID := params["CreatorID"]
-	CreatorIDint, err := strconv.Atoi(CreatorID)
+	TargetType := params["type"]
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
+	}
 	if err != nil {
 		panic(err.Error())
 	}
 	if r.Method == "GET" {
 		if err == nil {
-			var personalRatings []Rating = getReceivedRatings(db, CreatorIDint)
+			var personalRatings []Rating = getReceivedRatings(db, TargetType, TargetIDInt)
 			if len(personalRatings) > 0 {
 				fmt.Println(personalRatings)
 				json.NewEncoder(w).Encode(personalRatings)
@@ -460,43 +534,28 @@ func receivedRatings(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
 		}
 	}
-	if r.Method == "PUT" {
-		// read the string sent to the service
-		var RatingInput Rating
-		reqBody, err := ioutil.ReadAll(r.Body)
-
-		if err == nil {
-			// convert JSON to object
-			json.Unmarshal(reqBody, &RatingInput)
-			updateRecord(db, RatingInput)
-			w.WriteHeader(http.StatusAccepted)
-			w.Write([]byte("202 - Your Rating has been successfully updated!"))
-		}
-	} else {
-		w.WriteHeader(
-			http.StatusUnprocessableEntity)
-		w.Write([]byte("422 - Please enter account detais in JSON format!"))
-	}
 }
 
-func postedStudentRatings(w http.ResponseWriter, r *http.Request) {
+func postedRatings(w http.ResponseWriter, r *http.Request) {
+	println("This ran in postedRatings")
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
 	// handle error
 	if err != nil {
 		panic(err.Error())
 	}
 	params := mux.Vars(r)
-	CreatorID := params["CreatorID"]
-	CreatorIDint, err := strconv.Atoi(CreatorID)
+	CreatorType := params["type"]
+	CreatorID := params["id"]
+	CreatorIDInt, err := strconv.Atoi(CreatorID)
 	if err != nil {
 		panic(err.Error())
 	}
 	if r.Method == "GET" {
 		if err == nil {
-			studentRatingList := getStudentRatings(db, CreatorIDint)
-			if len(studentRatingList) > 0 {
-				fmt.Println(studentRatingList)
-				json.NewEncoder(w).Encode(studentRatingList)
+			var postedRatingsList []Rating = getPostedRatings(db, CreatorType, CreatorIDInt)
+			if len(postedRatingsList) > 0 {
+				fmt.Println(postedRatingsList)
+				json.NewEncoder(w).Encode(postedRatingsList)
 			} else {
 				w.WriteHeader(http.StatusNotFound)
 			}
@@ -524,6 +583,10 @@ func main() {
 
 	router.HandleFunc("/api/rating", rating).Methods("POST", "PUT")
 
+	router.HandleFunc("/api/rating/received/{type}/{id}", receivedRatings).Methods("GET")
+
+	router.HandleFunc("/api/rating/posted/{type}/{id}", postedRatings).Methods("GET")
+
 	router.HandleFunc("/api/rating/student/{studentid}", studentRatings).Methods("GET")
 
 	router.HandleFunc("/api/rating/tutor/{tutorid}", tutorRatings).Methods("GET")
@@ -531,16 +594,6 @@ func main() {
 	router.HandleFunc("/api/rating/class/{classid}", classRatings).Methods("GET")
 
 	router.HandleFunc("/api/rating/module/{moduleid}", moduleRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/student/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/class/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/module/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/tutor/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/received/{CreatorID}", receivedRatings).Methods("GET")
 
 	fmt.Println("Listening at port 5002")
 	log.Fatal(http.ListenAndServe(":5002", handlers.CORS(headers, origins, methods)(router)))

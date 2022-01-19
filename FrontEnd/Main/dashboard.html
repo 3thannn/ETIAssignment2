@@ -47,7 +47,7 @@
                 object = List[i];
                 var ID = object.ID
                 console.log(ID);
-                var redirectLink = "/C:/projects/src/ETIAssignment2/FrontEnd/Main/details.html?id=" + ID + '?' + objectType;
+                var redirectLink = "/C:/projects/src/ETIAssignment2/FrontEnd/Main/details.html?id=" + ID + '&type=' + objectType;
                 console.log(redirectLink);
                 stringdata = '<div class="col-lg-4 col-md-6 col-sm-12 pt-3"' +  'onclick="location' + ".href='" + redirectLink +"';" + '">';
                 console.log(stringdata)
@@ -122,6 +122,28 @@
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
+                }
+            });
+        }
+        function getComments(object){
+            console.log("runs getComments");
+            url = document.URL;
+            var type = url.substring(url.lastIndexOf('?') + 1);
+            var url1 = "http://localhost:5001/api/comment/" + type.toLowerCase();
+            var id = url.substring(url.lastIndexOf('=') + 1)[0];
+            fullurl = url1 + '/' + id;
+            $.ajax({
+                type: "GET",
+                url: fullurl,
+                success: function (response, textStatus) {
+                    commentList = JSON.parse(response);
+                    console.log(commentList);
+                    displayCommentData(object, commentList, type);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                    commentList = [];
+                    displayCommentData(object, commentList, type);
                 }
             });
         }

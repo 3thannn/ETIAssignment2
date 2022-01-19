@@ -48,6 +48,7 @@ func getModules(db *sql.DB) []Module {
 		moduleResults.Scan(&module.ID, &module.Name)
 		moduleList = append(moduleList, module)
 	}
+	fmt.Println(moduleList)
 	return moduleList
 }
 

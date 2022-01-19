@@ -1,0 +1,156 @@
+<html>
+    <head>
+        <title>My Comments</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <body>
+        <div class='container pt-5 pb-4'>
+            <div class="row">
+                <div class="col-12">
+                    <h1 style="text-align: center;">My Comments</h1>
+                </div>
+            </div>
+            <div id="receivedCommentsHeader" class="mt-4"></div>
+            <div id="receivedComments" style="max-height:60vh !important; overflow-y: scroll;">
+                
+            </div>
+            </br>
+            </br>
+            <div id="postedCommentsHeader" class="mt-4"></div>
+            <div id="postedComments" style="max-height:60vh !important; overflow-y: scroll;">
+               
+            </div>
+            </br>
+            </br>
+        </div>
+    </body>
+    <script>
+        url = document.URL;
+        let params = (new URL(url)).searchParams;
+        var type = params.get('type');
+        var id = params.get('id');
+        getReceivedComments(type,id);
+        getPostedComments(type,id);
+        function getReceivedComments(type, id){
+            document.getElementById('receivedComments').innerHTML = '';
+            url = "http://localhost:5001/api/comment/received/" + type + "/" + id;
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    commentsList = JSON.parse(response);
+                    console.log(commentsList);
+                    displayReceivedComments(commentsList);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                    commentsList = [];
+                    displayReceivedComments(commentsList);
+                }
+            });
+        }
+        function getPostedComments(type, id){
+            document.getElementById('postedComments').innerHTML = '';
+            url = "http://localhost:5001/api/comment/posted/" + type + "/" + id;
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    commentsList = JSON.parse(response);
+                    console.log(commentsList);
+                    displayPostedComments(commentsList);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                    commentsList = [];
+                    displayPostedComments(commentsList);
+                }
+            });
+        }
+        function displayReceivedComments(commentList){
+            if (commentList.length == 0){
+                document.getElementById('receivedCommentsHeader').innerHTML = '<h3 style="text-align:center;">No Comments Received Yet!</h3>';
+            }
+            else{
+                document.getElementById('receivedCommentsHeader').innerHTML = '<h3 style="text-align:center;">My Received Comments</h3>';
+                var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                for (i = 0; i < commentList.length; i ++) {
+                    object = commentList[i];
+                    var commentDate = new Date(object.DateTimePublished);
+                    formatedCommentDate = commentDate.toLocaleDateString("en-US", options);
+                    formatedCommentTime = commentDate.toLocaleTimeString("en-US");
+                    var creatorName = "";
+                    if (object.Anonymous == 1){
+                        creatorName = "Anonymous User";
+                        creatorType = "-"
+                    }
+                    else{
+                        creatorName = object.CreatorName;
+                        creatorType = object.CreatorType
+                    }
+                    var displayData = 
+                    '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
+                        '<div class="col-4">' +
+                            '<span style="font-weight:bold; font-size:17px;">' + "To: " + '</span>' +                            
+                            '<span style="font-weight:bold; font-size:17px;">' + object.TargetName + '</span>' + '</br>' +
+                            '<span style="font-weight:bold; font-size:15px; color:grey">' + object.TargetType  + '</span>' + '</br>' +
+                            '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                            '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</br>' + formatedCommentTime + '</span>' + '</br>' +
+                            '<span style="font-weight:bold; font-size:17px;">' + "From: " + '</span>' +  
+                            '<span style="font-weight:bold; font-size:17px;">' + creatorName + '</span>' + '</br>' +
+                            '<span style="font-weight:bold; font-size:15px; color:grey">' + creatorType  + '</span>' + '</br>' +
+                        '</div>' +
+                        '<div class="col-8">' +
+                            object.CommentData  + 
+                        '</div>' + 
+                    '</div>' ;
+                    document.getElementById('receivedComments').innerHTML += displayData;
+                }
+            }     
+        }
+        function displayPostedComments(commentList){
+            if (commentList.length == 0){
+                document.getElementById('postedCommentsHeader').innerHTML = '<h3 style="text-align:center;">No Comments Posted Yet!</h3>';
+            }
+            else{
+                document.getElementById('postedCommentsHeader').innerHTML = '<h3 style="text-align:center;">My Posted Comments</h3>';
+                var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                for (i = 0; i < commentList.length; i ++) {
+                    object = commentList[i];
+                    var commentDate = new Date(object.DateTimePublished);
+                    formatedCommentDate = commentDate.toLocaleDateString("en-US", options);
+                    formatedCommentTime = commentDate.toLocaleTimeString("en-US");
+                    var creatorName = "";
+                    if (object.Anonymous == 1){
+                       Anonymous = "True"
+                    }
+                    else{
+                        Anonymous = "False";
+                    }
+                    var displayData = 
+                    '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
+                        '<div class="col-4">' +
+                            '<span style="font-weight:bold; font-size:17px;">' + "To: " + '</span>' + 
+                            '<span style="font-weight:bold; font-size:17px;">' + object.TargetName + '</span>' + '</br>' +
+                            '<span style="font-weight:bold; font-size:15px; color:grey">' + object.TargetType  + '</span>' + '</br>' +
+                            '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                            '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</br>' + formatedCommentTime + '</span>' + '</br>' +
+                            '<span style="font-size:13px;">' +  'Anonymous: ' + Anonymous + '</span>' + 
+                        '</div>' +
+                        '<div class="col-8">' +
+                            object.CommentData  + 
+                        '</div>' + 
+                    '</div>' ;
+                    document.getElementById('postedComments').innerHTML += displayData;
+                }
+            }     
+        }
+    </script>
+</html>

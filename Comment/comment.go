@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -74,7 +75,7 @@ func getAllTutors(db *sql.DB) []Object {
 
 //Gets all Class Name which is tied to ClassID
 func getAllClasses(db *sql.DB) []Object {
-	url := "http://localhost:5005/api/class"
+	url := "http://localhost:5006/api/class"
 	response, err := http.Get(url)
 	var classList []Object
 	if err != nil {
@@ -94,7 +95,7 @@ func getAllClasses(db *sql.DB) []Object {
 
 //Gets all Module Name which is tied to ModuleID
 func getAllModules(db *sql.DB) []Object {
-	url := "http://localhost:5006/api/module"
+	url := "http://localhost:5005/api/module"
 	response, err := http.Get(url)
 	var moduleList []Object
 	if err != nil {
@@ -447,6 +448,8 @@ func moduleComments(w http.ResponseWriter, r *http.Request) {
 
 //Get all comments received
 func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment {
+	TargetType = strings.ToLower(TargetType)
+	fmt.Println(TargetType, TargetID)
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
@@ -460,7 +463,7 @@ func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment 
 	var commentList []Comment
 	for results.Next() {
 		var comment Comment
-		results.Scan(&comment.CommentID, &comment.CreatorID, &comment.TargetID, &comment.TargetType, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
+		results.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
 		if comment.CreatorType == "Student" {
 			student := linkStudentToID(db, comment.CreatorID, studentList)
 			comment.CreatorName = student.Name
@@ -470,19 +473,20 @@ func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment 
 			comment.CreatorName = tutor.Name
 			println(tutor.Name)
 		}
-		if TargetType == "Student" {
+		if TargetType == "student" {
 			student := linkStudentToID(db, TargetID, studentList)
 			comment.TargetName = student.Name
-		} else if TargetType == "Tutor" {
+		} else if TargetType == "tutor" {
 			tutor := linkTutorToID(db, TargetID, tutorList)
 			comment.TargetName = tutor.Name
-		} else if TargetType == "Module" {
+		} else if TargetType == "module" {
 			module := linkModuleToID(db, TargetID, moduleList)
 			comment.TargetName = module.Name
-		} else if TargetType == "Class" {
+		} else if TargetType == "class" {
 			class := linkClassToID(db, TargetID, classList)
 			comment.TargetName = class.Name
 		}
+		fmt.Println(comment)
 		commentList = append(commentList, comment)
 	}
 	return commentList
@@ -494,7 +498,6 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment 
 	moduleList := getAllModules(db)
 	classList := getAllClasses(db)
 	query := fmt.Sprintf("SELECT * FROM Comment WHERE CreatorID = '%d' AND CreatorType = '%s'", CreatorID, CreatorType)
-
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -502,7 +505,7 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment 
 	var commentList []Comment
 	for results.Next() {
 		var comment Comment
-		results.Scan(&comment.CommentID, &comment.CreatorID, &comment.TargetID, &comment.TargetType, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
+		results.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
 		if comment.CreatorType == "Student" {
 			student := linkStudentToID(db, comment.CreatorID, studentList)
 			comment.CreatorName = student.Name
@@ -512,19 +515,22 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment 
 			comment.CreatorName = tutor.Name
 			println(tutor.Name)
 		}
-		if CreatorType == "Student" {
-			student := linkStudentToID(db, CreatorID, studentList)
+		if comment.TargetType == "Student" {
+			student := linkStudentToID(db, comment.TargetID, studentList)
 			comment.TargetName = student.Name
-		} else if CreatorType == "Tutor" {
-			tutor := linkTutorToID(db, CreatorID, tutorList)
+		} else if comment.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, comment.TargetID, tutorList)
 			comment.TargetName = tutor.Name
-		} else if CreatorType == "Module" {
-			module := linkModuleToID(db, CreatorID, moduleList)
+		} else if comment.TargetType == "Module" {
+			module := linkModuleToID(db, comment.TargetID, moduleList)
+			fmt.Print("this is the module: ")
+			fmt.Println(module)
 			comment.TargetName = module.Name
-		} else if CreatorType == "Class" {
-			class := linkClassToID(db, CreatorID, classList)
+		} else if comment.TargetType == "Class" {
+			class := linkClassToID(db, comment.TargetID, classList)
 			comment.TargetName = class.Name
 		}
+		fmt.Println(comment)
 		commentList = append(commentList, comment)
 	}
 	return commentList
@@ -573,10 +579,10 @@ func postedComments(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == "GET" {
 		if err == nil {
-			var personalComments []Comment = getReceivedComments(db, TargetType, TargetIDInt)
-			if len(personalComments) > 0 {
-				fmt.Println(personalComments)
-				json.NewEncoder(w).Encode(personalComments)
+			var postedComments []Comment = getPostedComments(db, TargetType, TargetIDInt)
+			if len(postedComments) > 0 {
+				fmt.Println(postedComments)
+				json.NewEncoder(w).Encode(postedComments)
 			} else {
 				w.WriteHeader(http.StatusNotFound)
 			}
@@ -604,9 +610,9 @@ func main() {
 
 	router.HandleFunc("/api/comment", comment).Methods("POST", "PUT")
 
-	router.HandleFunc("/api/mycomments/?=type={type}&id={id}", receivedComments).Methods("GET")
+	router.HandleFunc("/api/comment/received/{type}/{id}", receivedComments).Methods("GET")
 
-	router.HandleFunc("/api/postedcomments/?=type={type}&id={id}", postedComments).Methods("GET")
+	router.HandleFunc("/api/comment/posted/{type}/{id}", postedComments).Methods("GET")
 
 	router.HandleFunc("/api/comment/student/{studentid}", studentComments).Methods("GET")
 
@@ -615,16 +621,6 @@ func main() {
 	router.HandleFunc("/api/comment/class/{classid}", classComments).Methods("GET")
 
 	router.HandleFunc("/api/comment/module/{moduleid}", moduleComments).Methods("GET")
-
-	// router.HandleFunc("/api/comment/student/sent/{CreatorID}", postedComments).Methods("GET")
-
-	// router.HandleFunc("/api/comment/class/sent/{CreatorID}", postedComments).Methods("GET")
-
-	// router.HandleFunc("/api/comment/module/sent/{CreatorID}", postedComments).Methods("GET")
-
-	// router.HandleFunc("/api/comment/tutor/sent/{CreatorID}", postedComments).Methods("GET")
-
-	// router.HandleFunc("/api/comment/received/{CreatorID}", receivedComments).Methods("GET")
 
 	fmt.Println("Listening at port 5001")
 	log.Fatal(http.ListenAndServe(":5001", handlers.CORS(headers, origins, methods)(router)))
