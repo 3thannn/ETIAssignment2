@@ -103,13 +103,13 @@
                             '<span style="font-weight:bold; font-size:17px;">' + "From: " + '</span>' + 
                             '<span style="font-weight:bold; font-size:17px;">' + creatorName + '</span>' + '</br>' +
                             '<span style="font-weight:bold; font-size:15px; color:grey">' + creatorType + '</span>' + '</br>' +
-                            '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                            '<span style="font-size:13px;">' +  'Rated At:' + '</span>' + '</br>' + 
                             '<span style="font-size:13px; font-style:italic;">' + formatedRatingDate + '</br>' + formatedRatingTime + '</span>' + '</br>' +
                         '</div>' +
                         '<div class="col-8" id="' + colID + '">' + 
                         '</div>' + 
                     '</div>' ;
-                    document.getElementById('receivedComments').innerHTML += displayData;
+                    document.getElementById('receivedRatings').innerHTML += displayData;
                     for (y = 0; y < parseInt(object.RatingScore); y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
                     }
@@ -147,14 +147,14 @@
                             '<span style="font-weight:bold; font-size:17px;">' + "To: " + '</span>' + 
                             '<span style="font-weight:bold; font-size:17px;">' + object.TargetName + '</span>' + '</br>' +
                             '<span style="font-weight:bold; font-size:15px; color:grey">' + object.TargetType  + '</span>' + '</br>' +
-                            '<span style="font-size:13px;">' +  'Commented At:' + '</span>' + '</br>' + 
+                            '<span style="font-size:13px;">' +  'Rated At:' + '</span>' + '</br>' + 
                             '<span style="font-size:13px; font-style:italic;">' + formatedRatingDate + '</br>' + formatedRatingTime + '</span>' + '</br>' +
                             '<span style="font-size:13px;">' +  'Anonymous: ' + Anonymous + '</span>' + 
                         '</div>' +
                         '<div class="col-8" id="' + colID + '">' + 
                         '</div>' + 
                     '</div>' ;
-                    document.getElementById('postedComments').innerHTML += displayData;
+                    document.getElementById('postedRatings').innerHTML += displayData;
                     for (y = 0; y < parseInt(object.RatingScore); y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
                     }

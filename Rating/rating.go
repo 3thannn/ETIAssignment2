@@ -369,7 +369,7 @@ func getPostedRatings(db *sql.DB, CreatorType string, CreatorID int) []Rating {
 	}
 	for results.Next() {
 		var rating Rating
-		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, &rating.DateTimePublished)
 		if rating.CreatorType == "Student" {
 			student := linkStudentToID(db, rating.CreatorID, studentList)
 			rating.CreatorName = student.Name
@@ -411,7 +411,7 @@ func getReceivedRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
 	}
 	for results.Next() {
 		var rating Rating
-		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, &rating.DateTimePublished)
 		if rating.CreatorType == "Student" {
 			student := linkStudentToID(db, rating.CreatorID, studentList)
 			rating.CreatorName = student.Name
@@ -514,6 +514,8 @@ func receivedRatings(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	TargetType := params["type"]
 	TargetID := params["id"]
+	println(TargetType)
+	println(TargetID)
 	TargetIDInt, err := strconv.Atoi(TargetID)
 	if err != nil {
 		panic(err.Error())

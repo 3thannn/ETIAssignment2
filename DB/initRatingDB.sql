@@ -14,3 +14,6 @@ CREATE TABLE Rating(
 	RatingScore int NOT NULL,
 	Anonymous bool NOT NULL DEFAULT False,
 	DateTimePublished datetime DEFAULT CURRENT_TIMESTAMP());
+    
+INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous) 
+VALUES(2,'Student', 1, 'Student', 3, True), (3, 'Student', 1, 'Student', 4, False);
