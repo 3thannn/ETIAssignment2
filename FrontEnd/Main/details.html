@@ -34,7 +34,8 @@
     </body>
     <script>
         url = document.URL;
-        var type = url.substring(url.lastIndexOf('?') + 1);
+        let params = (new URL(url)).searchParams;
+        var type = params.get('type');
         if(type == "Student"){
             document.getElementById('commentsButton').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getStudent(' + "'comments'" + ')"' + '>Comments</button>';
             document.getElementById('ratingsButton').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getStudent(' + "'ratings'" + ')"' + '>Ratings</button>';

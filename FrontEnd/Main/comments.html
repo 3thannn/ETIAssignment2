@@ -134,6 +134,7 @@
                     else{
                         Anonymous = "False";
                     }
+                    var redirectLink = "/C:/projects/src/ETIAssignment2/FrontEnd/Main/update.html?id=" + object.CommentID + '&type=' + 'comment';
                     var displayData = 
                     '<div class="row m-4 p-3 bg-light" style="border-radius:10px;">' +
                         '<div class="col-4">' +
@@ -144,9 +145,10 @@
                             '<span style="font-size:13px; font-style:italic;">' + formatedCommentDate + '</br>' + formatedCommentTime + '</span>' + '</br>' +
                             '<span style="font-size:13px;">' +  'Anonymous: ' + Anonymous + '</span>' + 
                         '</div>' +
-                        '<div class="col-8">' +
+                        '<div class="col-7">' +
                             object.CommentData  + 
-                        '</div>' + 
+                        '</div>' +  
+                        '<div class=col-1>' + '<button class="btn btn-warning mt-4"'+ 'onclick="location' + ".href='" + redirectLink +"';" + '">' + 'Edit' + '</button>' + '</div>'
                     '</div>' ;
                     document.getElementById('postedComments').innerHTML += displayData;
                 }

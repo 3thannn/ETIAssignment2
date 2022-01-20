@@ -148,6 +148,45 @@ func linkModuleToID(db *sql.DB, id int, moduleList []Object) Object {
 	return module
 }
 
+func getRating(db *sql.DB, RatingId int) Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE RatingId = '%d';", RatingId)
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	var rating Rating
+	for results.Next() {
+		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, &rating.DateTimePublished)
+		if rating.CreatorType == "Student" {
+			student := linkStudentToID(db, rating.CreatorID, studentList)
+			rating.CreatorName = student.Name
+			println(student.Name)
+		} else if rating.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+			rating.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if rating.TargetType == "Student" {
+			student := linkStudentToID(db, rating.TargetID, studentList)
+			rating.TargetName = student.Name
+		} else if rating.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, rating.TargetID, tutorList)
+			rating.TargetName = tutor.Name
+		} else if rating.TargetType == "Module" {
+			module := linkModuleToID(db, rating.TargetID, moduleList)
+			rating.TargetName = module.Name
+		} else if rating.TargetType == "Class" {
+			class := linkClassToID(db, rating.TargetID, classList)
+			rating.TargetName = class.Name
+		}
+	}
+	return rating
+}
+
 func getStudentRatings(db *sql.DB, targetID int) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
@@ -461,31 +500,32 @@ func postRating(db *sql.DB, rating Rating) {
 	}
 }
 
-// func updateRecord(db *sql.DB, Rating Rating) {
-// 	RatingID := Rating.RatingID
-// 	RatingScore := Rating.RatingScore
-// 	query := ""
-// 	if Rating.TargetType == "Student" {
-// 		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Student", RatingScore, RatingID)
-// 	} else if Rating.TargetType == "Class" {
-// 		query = fmt.Sprintf("UPDATE  Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Class", RatingScore, RatingID)
-// 	} else if Rating.TargetType == "Module" {
-// 		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Module", RatingScore, RatingID)
-// 	} else if Rating.TargetType == "Tutor" {
-// 		query = fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d' AND TargetType = Tutor", RatingScore, RatingID)
-// 	}
-// 	_, err := db.Query(query) //Run Query
+func updateRecord(db *sql.DB, rating Rating) {
 
-// 	if err != nil {
-// 		panic(err.Error())
-// 	}
-// }
+	query := fmt.Sprintf("UPDATE Rating SET RatingScore = '%d' WHERE RatingID = '%d'", rating.RatingScore, rating.RatingID)
+	_, err := db.Query(query) //Run Query
+	if err != nil {
+		panic(err.Error())
+	}
+}
 
 func rating(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
 	// handle error
 	if err != nil {
 		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		println(TargetIDInt)
+		var rating = getRating(db, TargetIDInt)
+		fmt.Println(rating)
+		json.NewEncoder(w).Encode(rating)
 	}
 	if r.Method == "POST" {
 		var newRating Rating
@@ -496,10 +536,24 @@ func rating(w http.ResponseWriter, r *http.Request) {
 			postRating(db, newRating)
 			w.WriteHeader(http.StatusCreated)
 			w.Write([]byte("201 - Rating Posted!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Please enter trip detais in JSON format!"))
 		}
-	} else {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte("422 - Please enter trip detais in JSON format!"))
+	}
+	if r.Method == "PUT" {
+		var rating Rating
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err == nil {
+			json.Unmarshal(reqBody, &rating)
+			fmt.Println(rating)
+			updateRecord(db, rating)
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte("201 - Rating Updated!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Could not update rating!"))
+		}
 	}
 }
 
@@ -507,22 +561,16 @@ func rating(w http.ResponseWriter, r *http.Request) {
 func receivedRatings(w http.ResponseWriter, r *http.Request) {
 	println("This ran in receivedRatings")
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
-	// handle error
 	if err != nil {
 		panic(err.Error())
 	}
+	// handle error
 	params := mux.Vars(r)
 	TargetType := params["type"]
 	TargetID := params["id"]
 	println(TargetType)
 	println(TargetID)
 	TargetIDInt, err := strconv.Atoi(TargetID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if err != nil {
-		panic(err.Error())
-	}
 	if r.Method == "GET" {
 		if err == nil {
 			var personalRatings []Rating = getReceivedRatings(db, TargetType, TargetIDInt)
@@ -583,7 +631,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/rating", rating).Methods("POST", "PUT")
+	router.HandleFunc("/api/rating/{id}", rating).Methods("GET", "POST", "PUT")
 
 	router.HandleFunc("/api/rating/received/{type}/{id}", receivedRatings).Methods("GET")
 

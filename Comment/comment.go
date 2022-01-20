@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -151,6 +150,49 @@ func linkModuleToID(db *sql.DB, id int, moduleList []Object) Object {
 		}
 	}
 	return module
+}
+
+func getComment(db *sql.DB, CommentId int) Comment {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	query := fmt.Sprintf("SELECT * FROM Comment WHERE CommentID = '%d';", CommentId)
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	var comment Comment
+	for results.Next() {
+
+		results.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
+		if comment.CreatorType == "Student" {
+			student := linkStudentToID(db, comment.CreatorID, studentList)
+			comment.CreatorName = student.Name
+			println(student.Name)
+		} else if comment.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, comment.CreatorID, tutorList)
+			comment.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if comment.TargetType == "Student" {
+			student := linkStudentToID(db, comment.TargetID, studentList)
+			comment.TargetName = student.Name
+		} else if comment.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, comment.TargetID, tutorList)
+			comment.TargetName = tutor.Name
+		} else if comment.TargetType == "Module" {
+			module := linkModuleToID(db, comment.TargetID, moduleList)
+			fmt.Print("this is the module: ")
+			fmt.Println(module)
+			comment.TargetName = module.Name
+		} else if comment.TargetType == "Class" {
+			class := linkClassToID(db, comment.TargetID, classList)
+			comment.TargetName = class.Name
+		}
+		fmt.Println(comment)
+	}
+	return comment
 }
 
 //3.9.1 View comments
@@ -321,18 +363,11 @@ func postComment(db *sql.DB, comment Comment) {
 }
 
 func updateRecord(db *sql.DB, comment Comment) {
+	fmt.Println(comment)
 	CommentID := comment.CommentID
 	CommentData := comment.CommentData
-	query := ""
-	if comment.TargetType == "Student" {
-		query = fmt.Sprintf("UPDATE Comment SET CommentData = '%s' WHERE CommentID = '%d' AND TargetType = Student", CommentData, CommentID)
-	} else if comment.TargetType == "Class" {
-		query = fmt.Sprintf("UPDATE  Comment SET CommentData = '%s' WHERE CommentID = '%d' AND TargetType = Class", CommentData, CommentID)
-	} else if comment.TargetType == "Module" {
-		query = fmt.Sprintf("UPDATE Comment SET CommentData = '%s' WHERE CommentID = '%d' AND TargetType = Module", CommentData, CommentID)
-	} else if comment.TargetType == "Tutor" {
-		query = fmt.Sprintf("UPDATE Comment SET CommentData = '%s' WHERE CommentID = '%d' AND TargetType = Tutor", CommentData, CommentID)
-	}
+	Anonymous := comment.Anonymous
+	query := fmt.Sprintf("UPDATE Comment SET CommentData = '%s', Anonymous = '%d' WHERE CommentID = '%d' ", CommentData, Anonymous, CommentID)
 	_, err := db.Query(query) //Run Query
 
 	if err != nil {
@@ -345,6 +380,17 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
+	params := mux.Vars(r)
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		var comment = getComment(db, TargetIDInt)
+		fmt.Println(comment)
+		json.NewEncoder(w).Encode(comment)
+	}
 	if r.Method == "POST" {
 		var newComment Comment
 		reqBody, err := ioutil.ReadAll(r.Body)
@@ -353,11 +399,25 @@ func comment(w http.ResponseWriter, r *http.Request) {
 			postComment(db, newComment)
 			w.WriteHeader(http.StatusCreated)
 			w.Write([]byte("201 - Comment Posted!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Comment Info not in JSON format!"))
 		}
-	} else {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte("422 - Comment Info not in JSON format!"))
 	}
+	if r.Method == "PUT" {
+		var comment Comment
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err == nil {
+			json.Unmarshal(reqBody, &comment)
+			updateRecord(db, comment)
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte("201 - Comment Updated!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Comment Info not in JSON format!"))
+		}
+	}
+
 }
 func studentComments(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
@@ -448,8 +508,6 @@ func moduleComments(w http.ResponseWriter, r *http.Request) {
 
 //Get all comments received
 func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment {
-	TargetType = strings.ToLower(TargetType)
-	fmt.Println(TargetType, TargetID)
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
@@ -473,17 +531,19 @@ func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment 
 			comment.CreatorName = tutor.Name
 			println(tutor.Name)
 		}
-		if TargetType == "student" {
-			student := linkStudentToID(db, TargetID, studentList)
+		if comment.TargetType == "Student" {
+			student := linkStudentToID(db, comment.TargetID, studentList)
 			comment.TargetName = student.Name
-		} else if TargetType == "tutor" {
-			tutor := linkTutorToID(db, TargetID, tutorList)
+		} else if comment.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, comment.TargetID, tutorList)
 			comment.TargetName = tutor.Name
-		} else if TargetType == "module" {
-			module := linkModuleToID(db, TargetID, moduleList)
+		} else if comment.TargetType == "Module" {
+			module := linkModuleToID(db, comment.TargetID, moduleList)
+			fmt.Print("this is the module: ")
+			fmt.Println(module)
 			comment.TargetName = module.Name
-		} else if TargetType == "class" {
-			class := linkClassToID(db, TargetID, classList)
+		} else if comment.TargetType == "Class" {
+			class := linkClassToID(db, comment.TargetID, classList)
 			comment.TargetName = class.Name
 		}
 		fmt.Println(comment)
@@ -608,7 +668,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/comment", comment).Methods("POST", "PUT")
+	router.HandleFunc("/api/comment/{id}", comment).Methods("GET", "POST", "PUT")
 
 	router.HandleFunc("/api/comment/received/{type}/{id}", receivedComments).Methods("GET")
 
