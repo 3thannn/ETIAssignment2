@@ -52,7 +52,7 @@ func getStudent(db *sql.DB, ID int) Student {
 }
 
 func students(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -76,7 +76,7 @@ func students(w http.ResponseWriter, r *http.Request) {
 }
 
 func student(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -128,6 +128,6 @@ func main() {
 
 	// router.HandleFunc("/api/Rating/received/{CreatorID}", receivedRatings).Methods("GET")
 
-	fmt.Println("Listening at port 5003")
-	log.Fatal(http.ListenAndServe(":5003", handlers.CORS(headers, origins, methods)(router)))
+	fmt.Println("Listening at port 9043")
+	log.Fatal(http.ListenAndServe(":9043", handlers.CORS(headers, origins, methods)(router)))
 }

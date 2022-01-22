@@ -34,7 +34,7 @@ type Object struct {
 
 //Gets all Student's ID which is tied to StudentID
 func getAllStudents(db *sql.DB) []Object {
-	url := "http://localhost:5003/api/student"
+	url := "http://localhost:9043/api/student"
 	response, err := http.Get(url)
 	var studentList []Object
 	if err != nil {
@@ -54,7 +54,7 @@ func getAllStudents(db *sql.DB) []Object {
 
 //Gets all Tutor's Names which is tied to TutorID
 func getAllTutors(db *sql.DB) []Object {
-	url := "http://localhost:5004/api/tutor"
+	url := "http://localhost:9044/api/tutor"
 	response, err := http.Get(url)
 	var tutorList []Object
 	if err != nil {
@@ -74,7 +74,7 @@ func getAllTutors(db *sql.DB) []Object {
 
 //Gets all Class Name which is tied to ClassID
 func getAllClasses(db *sql.DB) []Object {
-	url := "http://localhost:5006/api/class"
+	url := "http://localhost:9046/api/class"
 	response, err := http.Get(url)
 	var classList []Object
 	if err != nil {
@@ -485,7 +485,7 @@ func classComments(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func moduleComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -598,7 +598,7 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment 
 
 //Get all comments received
 func receivedComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -626,7 +626,7 @@ func receivedComments(w http.ResponseWriter, r *http.Request) {
 
 //Get all comments received
 func postedComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2TestDB")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -682,6 +682,6 @@ func main() {
 
 	router.HandleFunc("/api/comment/module/{moduleid}", moduleComments).Methods("GET")
 
-	fmt.Println("Listening at port 5001")
-	log.Fatal(http.ListenAndServe(":5001", handlers.CORS(headers, origins, methods)(router)))
+	fmt.Println("Listening at port 9041")
+	log.Fatal(http.ListenAndServe(":9041", handlers.CORS(headers, origins, methods)(router)))
 }

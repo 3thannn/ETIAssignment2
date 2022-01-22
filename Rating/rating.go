@@ -33,7 +33,7 @@ type Object struct {
 }
 
 func getAllStudents(db *sql.DB) []Object {
-	url := "http://localhost:5003/api/student"
+	url := "http://172.20.30.96:9043/api/student"
 	response, err := http.Get(url)
 	var studentList []Object
 	if err != nil {
@@ -52,7 +52,7 @@ func getAllStudents(db *sql.DB) []Object {
 }
 
 func getAllTutors(db *sql.DB) []Object {
-	url := "http://localhost:5004/api/tutor"
+	url := "http://172.20.30.96:9044/api/tutor"
 	response, err := http.Get(url)
 	var tutorList []Object
 	if err != nil {
@@ -71,7 +71,7 @@ func getAllTutors(db *sql.DB) []Object {
 }
 
 func getAllClasses(db *sql.DB) []Object {
-	url := "http://localhost:5006/api/class"
+	url := "http://172.20.30.96:9046/api/class"
 	response, err := http.Get(url)
 	var classList []Object
 	if err != nil {
@@ -90,7 +90,7 @@ func getAllClasses(db *sql.DB) []Object {
 }
 
 func getAllModules(db *sql.DB) []Object {
-	url := "http://localhost:5005/api/module"
+	url := "http://172.20.30.96:9045/api/module"
 	response, err := http.Get(url)
 	var moduleList []Object
 	if err != nil {
@@ -306,7 +306,7 @@ func getTutorRatings(db *sql.DB, targetID int) []Rating {
 }
 
 func studentRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -328,7 +328,7 @@ func studentRatings(w http.ResponseWriter, r *http.Request) {
 }
 
 func tutorRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -350,7 +350,7 @@ func tutorRatings(w http.ResponseWriter, r *http.Request) {
 }
 
 func classRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -372,7 +372,7 @@ func classRatings(w http.ResponseWriter, r *http.Request) {
 }
 
 func moduleRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -510,7 +510,7 @@ func updateRecord(db *sql.DB, rating Rating) {
 }
 
 func rating(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -560,7 +560,7 @@ func rating(w http.ResponseWriter, r *http.Request) {
 //Get all Ratings received
 func receivedRatings(w http.ResponseWriter, r *http.Request) {
 	println("This ran in receivedRatings")
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -588,7 +588,7 @@ func receivedRatings(w http.ResponseWriter, r *http.Request) {
 
 func postedRatings(w http.ResponseWriter, r *http.Request) {
 	println("This ran in postedRatings")
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Rating")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -645,6 +645,6 @@ func main() {
 
 	router.HandleFunc("/api/rating/module/{moduleid}", moduleRatings).Methods("GET")
 
-	fmt.Println("Listening at port 5002")
-	log.Fatal(http.ListenAndServe(":5002", handlers.CORS(headers, origins, methods)(router)))
+	fmt.Println("Listening at port 9042")
+	log.Fatal(http.ListenAndServe(":9042", handlers.CORS(headers, origins, methods)(router)))
 }

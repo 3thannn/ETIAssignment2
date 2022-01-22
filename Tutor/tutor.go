@@ -53,7 +53,7 @@ func getTutor(db *sql.DB, ID int) Tutor {
 }
 
 func tutors(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9949)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -77,7 +77,7 @@ func tutors(w http.ResponseWriter, r *http.Request) {
 }
 
 func tutor(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9949)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -129,6 +129,6 @@ func main() {
 
 	// router.HandleFunc("/api/Rating/received/{CreatorID}", receivedRatings).Methods("GET")
 
-	fmt.Println("Listening at port 5004")
-	log.Fatal(http.ListenAndServe(":5004", handlers.CORS(headers, origins, methods)(router)))
+	fmt.Println("Listening at port 9044")
+	log.Fatal(http.ListenAndServe(":9044", handlers.CORS(headers, origins, methods)(router)))
 }

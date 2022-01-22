@@ -1,0 +1,160 @@
+version: '3.8'
+
+services:
+  # MYSQL Database
+  db1:
+    container_name: "etiassignment2commentdb"
+    build:
+      context: ./DB
+      dockerfile: Dockerfile.commentdb
+    networks:
+      - default
+    environment:
+      MYSQL_TCP_PORT: 9047
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - 9047:9047
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - etiassignment2volume1:/var/lib/mysql
+    image: ethanhaseaten/etiassignment3\1testdb
+  db2:
+    container_name: "etiassignment2ratingdb"
+    build:
+      context: ./DB
+      dockerfile: Dockerfile.ratingdb
+    networks:
+      - default
+    environment:
+      MYSQL_TCP_PORT: 9048
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - 9048:9048
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - etiassignment2volume2:/var/lib/mysql
+    image: ethanhaseaten/etiassignment2testdb
+  db3:
+    container_name: "etiassignment2testdb"
+    build:
+      context: ./DB
+      dockerfile: Dockerfile.testdb
+    networks:
+      - default
+    environment:
+      MYSQL_TCP_PORT: 9049
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - 9049:9049
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - etiassignment2volume3:/var/lib/mysql
+    image: ethanhaseaten/etiassignment2testdb
+
+  # Frontend HTML
+  frontend:
+    container_name: frontendcontainer
+    depends_on:
+      - db
+      - db2
+      - db3
+      - commentcontainer
+      - ratingcontainer
+      - studentcontainer
+      - tutorcontainer
+      - classcontainer
+      - modulecontainer
+
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile.frontend
+    ports:
+      - 9040:80
+    deploy:
+      restart_policy:
+        condition: on-failure
+    image: ethanhaseaten/frontendcontainer
+  # Comment Microservice
+  commentcontainer:
+    depends_on:
+      - db1
+    build:
+      context: ./Comment
+      dockerfile: Dockerfile.comment
+    container_name: commentcontainer
+    ports:
+      - 9041:9041
+    image: ethanhaseaten/commentcontainer
+  # Comment Microservice
+
+  # Rating Microservice
+  ratingcontainer:
+    depends_on:
+      - db2
+    build:
+      context: ./Rating
+      dockerfile: Dockerfile.rating
+    container_name: ratingcontainer
+    ports:
+      - 9042:9042
+    image: ethanhaseaten/ratingcontainer
+
+  # Student Microservice
+  studentcontainer:
+    depends_on:
+      - db3
+    build:
+      context: ./Student
+      dockerfile: Dockerfile.trip
+    container_name: studentcontainer
+    ports:
+      - 9043:9043
+    image: ethanhaseaten/studentcontainer
+
+  # Tutor Microservice
+  tutorcontainer:
+    depends_on:
+      - db3
+    build:
+      context: ./Tutor
+      dockerfile: Dockerfile.Tutor
+    container_name: tutorcontainer
+    ports:
+      - 9044:9044
+    image: ethanhaseaten/tutorcontainer
+
+  # Module Microservice
+  modulecontainer:
+    depends_on:
+      - db3
+    build:
+      context: ./Module
+      dockerfile: Dockerfile.Module
+    container_name: modulecontainer
+    ports:
+      - 9045:9045
+    image: ethanhaseaten/modulecontainer
+  # Module Microservice
+  classcontainer:
+    depends_on:
+      - db3
+    build:
+      context: ./Class
+      dockerfile: Dockerfile.Module
+    container_name: classcontainer
+    ports:
+      - 9046:9046
+    image: ethanhaseaten/classcontainer
+networks:
+  default: null
+volumes:
+  etiassignment2volume1: null
+  etiassignment2volume2: null
+  etiassignment2volume3: null
+
