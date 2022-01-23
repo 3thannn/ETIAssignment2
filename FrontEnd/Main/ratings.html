@@ -40,7 +40,7 @@
         getPostedRatings(type,id);
         function getReceivedRatings(type, id){
             document.getElementById('receivedRatings').innerHTML = '';
-            url = "http://ratingcontainer:9042/api/rating/received/" + type + "/" + id;
+            url = "http://localhost:9042/api/rating/received/" + type + "/" + id;
             $.ajax({
                 type: "GET",
                 url: url,
@@ -58,7 +58,7 @@
         }
         function getPostedRatings(type, id){
             document.getElementById('postedRatings').innerHTML = '';
-            url = "http://ratingcontainer:9042/api/rating/posted/" + type + "/" + id;
+            url = "http://localhost:9042/api/rating/posted/" + type + "/" + id;
             $.ajax({
                 type: "GET",
                 url: url,
