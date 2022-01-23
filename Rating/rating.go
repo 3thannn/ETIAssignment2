@@ -478,6 +478,48 @@ func getReceivedRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
 	return RatingList
 }
 
+//Get all Ratings received
+func getReceivedAnonymousRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	var RatingList []Rating
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%d' AND TargetType = '%s' AND Anonymous = True", TargetID, TargetType)
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	for results.Next() {
+		var rating Rating
+		results.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, &rating.DateTimePublished)
+		if rating.CreatorType == "Student" {
+			student := linkStudentToID(db, rating.CreatorID, studentList)
+			rating.CreatorName = student.Name
+			println(student.Name)
+		} else if rating.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, rating.CreatorID, tutorList)
+			rating.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if rating.TargetType == "Student" {
+			student := linkStudentToID(db, rating.TargetID, studentList)
+			rating.TargetName = student.Name
+		} else if rating.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, rating.TargetID, tutorList)
+			rating.TargetName = tutor.Name
+		} else if rating.TargetType == "Module" {
+			module := linkModuleToID(db, rating.TargetID, moduleList)
+			rating.TargetName = module.Name
+		} else if rating.TargetType == "Class" {
+			class := linkClassToID(db, rating.TargetID, classList)
+			rating.TargetName = class.Name
+		}
+		RatingList = append(RatingList, rating)
+	}
+	return RatingList
+}
+
 func postRating(db *sql.DB, rating Rating) {
 	CreatorID := rating.CreatorID
 	println(rating.CreatorID)
@@ -586,6 +628,34 @@ func receivedRatings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func receivedAnonymousRatings(w http.ResponseWriter, r *http.Request) {
+	println("This ran in receivedRatings")
+	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	// handle error
+	params := mux.Vars(r)
+	TargetType := params["type"]
+	TargetID := params["id"]
+	println(TargetType)
+	println(TargetID)
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if r.Method == "GET" {
+		if err == nil {
+			var anonymousRatings []Rating = getReceivedAnonymousRatings(db, TargetType, TargetIDInt)
+			if len(anonymousRatings) > 0 {
+				fmt.Println(anonymousRatings)
+				json.NewEncoder(w).Encode(anonymousRatings)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+		} else {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+		}
+	}
+}
+
 func postedRatings(w http.ResponseWriter, r *http.Request) {
 	println("This ran in postedRatings")
 	db, err := sql.Open("mysql", "root:password@tcp(db:9048)/ETIAssignment2Rating")
@@ -634,6 +704,8 @@ func main() {
 	router.HandleFunc("/api/rating/{id}", rating).Methods("GET", "POST", "PUT")
 
 	router.HandleFunc("/api/rating/received/{type}/{id}", receivedRatings).Methods("GET")
+
+	router.HandleFunc("/api/rating/received/anonymous/{type}/{id}", receivedAnonymousRatings).Methods("GET")
 
 	router.HandleFunc("/api/rating/posted/{type}/{id}", postedRatings).Methods("GET")
 

@@ -1,6 +1,6 @@
 FROM mysql:latest
 
-COPY initTest.sql /docker-entrypoint-initdb.d/
+COPY initTestDB.sql /docker-entrypoint-initdb.d/
 
 RUN /entrypoint.sh
 

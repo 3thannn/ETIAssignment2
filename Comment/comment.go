@@ -34,7 +34,7 @@ type Object struct {
 
 //Gets all Student's ID which is tied to StudentID
 func getAllStudents(db *sql.DB) []Object {
-	url := "http://localhost:9043/api/student"
+	url := "http://172.20.30.96:9043/api/student"
 	response, err := http.Get(url)
 	var studentList []Object
 	if err != nil {
@@ -54,7 +54,7 @@ func getAllStudents(db *sql.DB) []Object {
 
 //Gets all Tutor's Names which is tied to TutorID
 func getAllTutors(db *sql.DB) []Object {
-	url := "http://localhost:9044/api/tutor"
+	url := "http://172.20.30.96:9044/api/tutor"
 	response, err := http.Get(url)
 	var tutorList []Object
 	if err != nil {
@@ -74,7 +74,7 @@ func getAllTutors(db *sql.DB) []Object {
 
 //Gets all Class Name which is tied to ClassID
 func getAllClasses(db *sql.DB) []Object {
-	url := "http://localhost:9046/api/class"
+	url := "http://172.20.30.96:9046/api/class"
 	response, err := http.Get(url)
 	var classList []Object
 	if err != nil {
@@ -94,7 +94,7 @@ func getAllClasses(db *sql.DB) []Object {
 
 //Gets all Module Name which is tied to ModuleID
 func getAllModules(db *sql.DB) []Object {
-	url := "http://localhost:5005/api/module"
+	url := "http://172.20.30.96:9045/api/module"
 	response, err := http.Get(url)
 	var moduleList []Object
 	if err != nil {
@@ -111,7 +111,6 @@ func getAllModules(db *sql.DB) []Object {
 	}
 	return moduleList
 }
-
 func linkStudentToID(db *sql.DB, id int, studentList []Object) Object {
 	var student Object
 	for _, student := range studentList {
@@ -552,6 +551,52 @@ func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment 
 	return commentList
 }
 
+//Get all anonymous comments received
+func getReceivedAnonymousComments(db *sql.DB, TargetType string, TargetID int) []Comment {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	query := fmt.Sprintf("SELECT * FROM Comment WHERE TargetID = '%d' AND TargetType = '%s' AND Anonymous = True", TargetID, TargetType)
+
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	var commentList []Comment
+	for results.Next() {
+		var comment Comment
+		results.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
+		if comment.CreatorType == "Student" {
+			student := linkStudentToID(db, comment.CreatorID, studentList)
+			comment.CreatorName = student.Name
+			println(student.Name)
+		} else if comment.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, comment.CreatorID, tutorList)
+			comment.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if comment.TargetType == "Student" {
+			student := linkStudentToID(db, comment.TargetID, studentList)
+			comment.TargetName = student.Name
+		} else if comment.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, comment.TargetID, tutorList)
+			comment.TargetName = tutor.Name
+		} else if comment.TargetType == "Module" {
+			module := linkModuleToID(db, comment.TargetID, moduleList)
+			fmt.Print("this is the module: ")
+			fmt.Println(module)
+			comment.TargetName = module.Name
+		} else if comment.TargetType == "Class" {
+			class := linkClassToID(db, comment.TargetID, classList)
+			comment.TargetName = class.Name
+		}
+		fmt.Println(comment)
+		commentList = append(commentList, comment)
+	}
+	return commentList
+}
+
 func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
@@ -594,6 +639,34 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment 
 		commentList = append(commentList, comment)
 	}
 	return commentList
+}
+
+//Get all comments received
+func receivedAnonymousComments(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2Comment")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	TargetType := params["type"]
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		if err == nil {
+			var anonymousComments []Comment = getReceivedAnonymousComments(db, TargetType, TargetIDInt)
+			if len(anonymousComments) > 0 {
+				fmt.Println(anonymousComments)
+				json.NewEncoder(w).Encode(anonymousComments)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+		} else {
+			fmt.Printf("The HTTP request failed with error %s\n", err)
+		}
+	}
 }
 
 //Get all comments received
@@ -671,6 +744,8 @@ func main() {
 	router.HandleFunc("/api/comment/{id}", comment).Methods("GET", "POST", "PUT")
 
 	router.HandleFunc("/api/comment/received/{type}/{id}", receivedComments).Methods("GET")
+
+	router.HandleFunc("/api/comment/received/anonymous/{type}/{id}", receivedAnonymousComments).Methods("GET")
 
 	router.HandleFunc("/api/comment/posted/{type}/{id}", postedComments).Methods("GET")
 

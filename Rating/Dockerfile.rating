@@ -12,7 +12,7 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN go build -o /driver
+RUN go build -o /Rating
 
 ##
 ## Deploy
@@ -21,8 +21,8 @@ RUN go build -o /driver
 FROM gcr.io/distroless/base-debian10
 
 WORKDIR /
-COPY --from=build /driver /driver
-EXPOSE 5002
+COPY --from=build /Rating /Rating
+EXPOSE 9042
 USER nonroot:nonroot
 
-ENTRYPOINT ["/driver"]
+ENTRYPOINT ["/Rating"]

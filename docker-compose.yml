@@ -19,7 +19,7 @@ services:
         condition: on-failure
     volumes:
       - etiassignment2volume1:/var/lib/mysql
-    image: ethanhaseaten/etiassignment3\1testdb
+    image: ethanhaseaten/etiassignment2testdb
   db2:
     container_name: "etiassignment2ratingdb"
     build:
@@ -61,7 +61,7 @@ services:
   frontend:
     container_name: frontendcontainer
     depends_on:
-      - db
+      - db1
       - db2
       - db3
       - commentcontainer
@@ -70,7 +70,6 @@ services:
       - tutorcontainer
       - classcontainer
       - modulecontainer
-
     build:
       context: ./FrontEnd
       dockerfile: Dockerfile.frontend
@@ -111,7 +110,7 @@ services:
       - db3
     build:
       context: ./Student
-      dockerfile: Dockerfile.trip
+      dockerfile: Dockerfile.student
     container_name: studentcontainer
     ports:
       - 9043:9043
@@ -123,7 +122,7 @@ services:
       - db3
     build:
       context: ./Tutor
-      dockerfile: Dockerfile.Tutor
+      dockerfile: Dockerfile.tutor
     container_name: tutorcontainer
     ports:
       - 9044:9044
@@ -135,7 +134,7 @@ services:
       - db3
     build:
       context: ./Module
-      dockerfile: Dockerfile.Module
+      dockerfile: Dockerfile.module
     container_name: modulecontainer
     ports:
       - 9045:9045
@@ -146,7 +145,7 @@ services:
       - db3
     build:
       context: ./Class
-      dockerfile: Dockerfile.Module
+      dockerfile: Dockerfile.class
     container_name: classcontainer
     ports:
       - 9046:9046
