@@ -3,7 +3,7 @@ version: '3.3'
 services:
   # MYSQL Database
   db1:
-    container_name: "etiassignment2commentdb"
+    container_name: etiassignment2commentdb3.9
     build:
       context: ./DB
       dockerfile: Dockerfile.commentdb
@@ -21,7 +21,7 @@ services:
       - etiassignment2volume1:/var/lib/mysql
     image: ethanhaseaten/etiassignment2testdb
   db2:
-    container_name: "etiassignment2ratingdb"
+    container_name: etiassignment2ratingdb3.9
     build:
       context: ./DB
       dockerfile: Dockerfile.ratingdb
@@ -39,7 +39,7 @@ services:
       - etiassignment2volume2:/var/lib/mysql
     image: ethanhaseaten/etiassignment2testdb
   db3:
-    container_name: "etiassignment2testdb"
+    container_name: etiassignment2testdb3.9
     build:
       context: ./DB
       dockerfile: Dockerfile.testdb
@@ -59,7 +59,7 @@ services:
 
   # Frontend HTML
   frontend:
-    container_name: frontendcontainer
+    container_name: ETIAssignment2FrontEnd3.9
     depends_on:
       - db1
       - db2
@@ -88,7 +88,7 @@ services:
     build:
       context: ./Comment
       dockerfile: Dockerfile.comment
-    container_name: commentcontainer
+    container_name: commentcontainer3.9
     ports:
       - 9041:9041
     image: ethanhaseaten/commentcontainer
@@ -102,7 +102,7 @@ services:
     build:
       context: ./Rating
       dockerfile: Dockerfile.rating
-    container_name: ratingcontainer
+    container_name: ratingcontainer3.9
     ports:
       - 9042:9042
     image: ethanhaseaten/ratingcontainer
@@ -116,7 +116,7 @@ services:
     build:
       context: ./Student
       dockerfile: Dockerfile.student
-    container_name: studentcontainer
+    container_name: studentcontainer3.9
     ports:
       - 9043:9043
     image: ethanhaseaten/studentcontainer
@@ -130,7 +130,7 @@ services:
     build:
       context: ./Tutor
       dockerfile: Dockerfile.tutor
-    container_name: tutorcontainer
+    container_name: tutorcontainer3.9
     ports:
       - 9044:9044
     image: ethanhaseaten/tutorcontainer
@@ -144,7 +144,7 @@ services:
     build:
       context: ./Module
       dockerfile: Dockerfile.module
-    container_name: modulecontainer
+    container_name: modulecontainer3.9
     ports:
       - 9045:9045
     image: ethanhaseaten/modulecontainer
@@ -157,7 +157,7 @@ services:
     build:
       context: ./Class
       dockerfile: Dockerfile.class
-    container_name: classcontainer
+    container_name: classcontainer3.9
     ports:
       - 9046:9046
     image: ethanhaseaten/classcontainer
