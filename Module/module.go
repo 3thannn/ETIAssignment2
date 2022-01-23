@@ -53,7 +53,7 @@ func getModules(db *sql.DB) []Module {
 }
 
 func modules(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9949)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db3:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -74,7 +74,7 @@ func modules(w http.ResponseWriter, r *http.Request) {
 }
 
 func module(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9949)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db3:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
