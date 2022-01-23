@@ -69,7 +69,7 @@
             url = document.URL;
             let params = (new URL(url)).searchParams;
             var id = params.get('id');
-            var url1 = "http://localhost:5003/api/getstudent";
+            var url1 = "http://studentcontainer:9043/api/getstudent";
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -95,7 +95,7 @@
             url = document.URL;
             let params = (new URL(url)).searchParams;
             var id = params.get('id');
-            var url1 = "http://localhost:5004/api/gettutor";
+            var url1 = "http://tutorcontainer:9044/api/gettutor";
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -120,7 +120,7 @@
             url = document.URL;
             let params = (new URL(url)).searchParams;
             var id = params.get('id');
-            var url1 = "http://localhost:5005/api/getmodule";
+            var url1 = "http://modulecontainer:9045/api/getmodule";
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -145,7 +145,7 @@
             url = document.URL;
             let params = (new URL(url)).searchParams;
             var id = params.get('id');
-            var url1 = "http://localhost:5006/api/getclass";
+            var url1 = "http://classcontainer:9046/api/getclass";
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -172,7 +172,7 @@
             let params = (new URL(url)).searchParams;
             var type = params.get('type');
             var id = params.get('id');
-            var url1 = "http://localhost:5001/api/comment/" + type.toLowerCase();
+            var url1 = "http://commentcontainer:9041/api/comment/" + type.toLowerCase();
             fullurl = url1 + '/' + id;
             $.ajax({
                 type: "GET",
@@ -196,7 +196,7 @@
             let params = (new URL(url)).searchParams;
             var type = params.get('type');
             var id = params.get('id');
-            var url1 = "http://localhost:5002/api/rating/" + type.toLowerCase();
+            var url1 = "http://ratingcontainer:9042/api/rating/" + type.toLowerCase();
             fullurl = url1 + '/' + id;
             console.log(fullurl);
             $.ajax({
@@ -299,7 +299,7 @@
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);
-            createComment(jsonString2, "http://localhost:5001/api/comment");
+            createComment(jsonString2, "http://commentcontainer:9041/api/comment");
         }
         function createComment(jsonString, urlString) {
             $.ajax({
@@ -444,7 +444,7 @@
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);
-            createRating(jsonString2, "http://localhost:5002/api/rating");
+            createRating(jsonString2, "http://ratingcontainer:9042/api/rating");
         }
         function createRating(jsonString, urlString) {
             $.ajax({

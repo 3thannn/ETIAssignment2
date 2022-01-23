@@ -40,7 +40,7 @@
         getPostedComments(type,id);
         function getReceivedComments(type, id){
             document.getElementById('receivedComments').innerHTML = '';
-            url = "http://localhost:5001/api/comment/received/" + type + "/" + id;
+            url = "http://commentcontainer:9041/api/comment/received/" + type + "/" + id;
             $.ajax({
                 type: "GET",
                 url: url,
@@ -58,7 +58,7 @@
         }
         function getPostedComments(type, id){
             document.getElementById('postedComments').innerHTML = '';
-            url = "http://localhost:5001/api/comment/posted/" + type + "/" + id;
+            url = "http://commentcontainer:9041/api/comment/posted/" + type + "/" + id;
             $.ajax({
                 type: "GET",
                 url: url,

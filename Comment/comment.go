@@ -34,7 +34,7 @@ type Object struct {
 
 //Gets all Student's ID which is tied to StudentID
 func getAllStudents(db *sql.DB) []Object {
-	url := "http://172.20.30.96:9043/api/student"
+	url := "http://studentcontainer:9043/api/student"
 	response, err := http.Get(url)
 	var studentList []Object
 	if err != nil {
@@ -54,7 +54,7 @@ func getAllStudents(db *sql.DB) []Object {
 
 //Gets all Tutor's Names which is tied to TutorID
 func getAllTutors(db *sql.DB) []Object {
-	url := "http://172.20.30.96:9044/api/tutor"
+	url := "http://tutorcontainer:9044/api/tutor"
 	response, err := http.Get(url)
 	var tutorList []Object
 	if err != nil {
@@ -74,7 +74,7 @@ func getAllTutors(db *sql.DB) []Object {
 
 //Gets all Class Name which is tied to ClassID
 func getAllClasses(db *sql.DB) []Object {
-	url := "http://172.20.30.96:9046/api/class"
+	url := "http://classcontainer:9046/api/class"
 	response, err := http.Get(url)
 	var classList []Object
 	if err != nil {
@@ -94,7 +94,7 @@ func getAllClasses(db *sql.DB) []Object {
 
 //Gets all Module Name which is tied to ModuleID
 func getAllModules(db *sql.DB) []Object {
-	url := "http://172.20.30.96:9045/api/module"
+	url := "http://modulecontainer:9045/api/module"
 	response, err := http.Get(url)
 	var moduleList []Object
 	if err != nil {

@@ -52,7 +52,7 @@ func getClasses(db *sql.DB) []ClassObject {
 }
 
 func classes(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9949)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db3:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -76,7 +76,7 @@ func classes(w http.ResponseWriter, r *http.Request) {
 }
 
 func class(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9949)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db3:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())

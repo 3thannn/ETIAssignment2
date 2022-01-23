@@ -52,7 +52,7 @@ func getStudent(db *sql.DB, ID int) Student {
 }
 
 func students(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9049)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db3:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())
@@ -76,7 +76,7 @@ func students(w http.ResponseWriter, r *http.Request) {
 }
 
 func student(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9049)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db3:9049)/ETIAssignment2TestDB")
 	// handle error
 	if err != nil {
 		panic(err.Error())

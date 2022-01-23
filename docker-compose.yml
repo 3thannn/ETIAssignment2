@@ -8,7 +8,7 @@ services:
       context: ./DB
       dockerfile: Dockerfile.commentdb
     networks:
-      - default
+      - assignment2bridge
     environment:
       MYSQL_TCP_PORT: 9047
       MYSQL_ROOT_PASSWORD: "password"
@@ -26,7 +26,7 @@ services:
       context: ./DB
       dockerfile: Dockerfile.ratingdb
     networks:
-      - default
+      - assignment2bridge
     environment:
       MYSQL_TCP_PORT: 9048
       MYSQL_ROOT_PASSWORD: "password"
@@ -44,7 +44,7 @@ services:
       context: ./DB
       dockerfile: Dockerfile.testdb
     networks:
-      - default
+      - assignment2bridge
     environment:
       MYSQL_TCP_PORT: 9049
       MYSQL_ROOT_PASSWORD: "password"
@@ -79,6 +79,8 @@ services:
       restart_policy:
         condition: on-failure
     image: ethanhaseaten/frontendcontainer
+    networks:
+      - assignment2bridge
   # Comment Microservice
   commentcontainer:
     depends_on:
@@ -90,7 +92,8 @@ services:
     ports:
       - 9041:9041
     image: ethanhaseaten/commentcontainer
-  # Comment Microservice
+    networks:
+      - assignment2bridge
 
   # Rating Microservice
   ratingcontainer:
@@ -103,6 +106,8 @@ services:
     ports:
       - 9042:9042
     image: ethanhaseaten/ratingcontainer
+    networks:
+      - assignment2bridge
 
   # Student Microservice
   studentcontainer:
@@ -115,6 +120,8 @@ services:
     ports:
       - 9043:9043
     image: ethanhaseaten/studentcontainer
+    networks:
+      - assignment2bridge
 
   # Tutor Microservice
   tutorcontainer:
@@ -127,6 +134,8 @@ services:
     ports:
       - 9044:9044
     image: ethanhaseaten/tutorcontainer
+    networks:
+      - assignment2bridge
 
   # Module Microservice
   modulecontainer:
@@ -139,6 +148,8 @@ services:
     ports:
       - 9045:9045
     image: ethanhaseaten/modulecontainer
+    networks:
+      - assignment2bridge
   # Module Microservice
   classcontainer:
     depends_on:
@@ -150,8 +161,11 @@ services:
     ports:
       - 9046:9046
     image: ethanhaseaten/classcontainer
+    networks:
+      - assignment2bridge
 networks:
-  default: null
+  assignment2bridge: 
+    driver: bridge
 volumes:
   etiassignment2volume1: null
   etiassignment2volume2: null
