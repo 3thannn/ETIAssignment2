@@ -237,7 +237,7 @@ func getClassComments(db *sql.DB, targetID int) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	classList := getAllClasses(db)
-	classQuery := fmt.Sprintf("SELECT * FROM Comment WHERE TargetType = 'Class'; AND TargetID = '%d'", targetID)
+	classQuery := fmt.Sprintf("SELECT * FROM Comment WHERE TargetType = 'Class' AND TargetID = '%d'", targetID)
 
 	classResults, err := db.Query(classQuery)
 	if err != nil {
@@ -339,7 +339,7 @@ func getTutorComments(db *sql.DB, targetID int) []Comment {
 	return tutorCommentList
 }
 
-func postComment(db *sql.DB, comment Comment) {
+func insertComment(db *sql.DB, comment Comment) {
 	CreatorType := comment.CreatorType
 	println(comment.CreatorType)
 	CreatorID := comment.CreatorID
@@ -374,137 +374,6 @@ func updateRecord(db *sql.DB, comment Comment) {
 	}
 }
 
-func comment(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	TargetID := params["id"]
-	TargetIDInt, err := strconv.Atoi(TargetID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		var comment = getComment(db, TargetIDInt)
-		fmt.Println(comment)
-		json.NewEncoder(w).Encode(comment)
-	}
-	if r.Method == "POST" {
-		var newComment Comment
-		reqBody, err := ioutil.ReadAll(r.Body)
-		if err == nil {
-			json.Unmarshal(reqBody, &newComment)
-			postComment(db, newComment)
-			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte("201 - Comment Posted!"))
-		} else {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			w.Write([]byte("422 - Comment Info not in JSON format!"))
-		}
-	}
-	if r.Method == "PUT" {
-		var comment Comment
-		reqBody, err := ioutil.ReadAll(r.Body)
-		if err == nil {
-			json.Unmarshal(reqBody, &comment)
-			updateRecord(db, comment)
-			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte("201 - Comment Updated!"))
-		} else {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			w.Write([]byte("422 - Comment Info not in JSON format!"))
-		}
-	}
-
-}
-func studentComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	studentID := params["studentid"]
-	studentIDint, err := strconv.Atoi(studentID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		studentCommentList := getStudentComments(db, studentIDint)
-		if len(studentCommentList) > 0 {
-			fmt.Println(studentCommentList)
-			json.NewEncoder(w).Encode(studentCommentList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-func tutorComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	tutorID := params["tutorid"]
-	tutorIDint, err := strconv.Atoi(tutorID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		tutorCommentList := getTutorComments(db, tutorIDint)
-		if len(tutorCommentList) > 0 {
-			fmt.Println(tutorCommentList)
-			json.NewEncoder(w).Encode(tutorCommentList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func classComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/ETIAssignment2Comment")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	classID := params["classid"]
-	classIDint, err := strconv.Atoi(classID)
-	if err != nil {
-		panic(err.Error())
-	}
-	// handle error
-	if r.Method == "GET" {
-		classCommentList := getClassComments(db, classIDint)
-		if len(classCommentList) > 0 {
-			fmt.Println(classCommentList)
-			json.NewEncoder(w).Encode(classCommentList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-func moduleComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2Comment")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	moduleID := params["moduleid"]
-	moduleIDint, err := strconv.Atoi(moduleID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		moduleCommentList := getModuleComments(db, moduleIDint)
-		if len(moduleCommentList) > 0 {
-			fmt.Println(moduleCommentList)
-			json.NewEncoder(w).Encode(moduleCommentList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
 //Get all comments received
 func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment {
 	studentList := getAllStudents(db)
@@ -513,6 +382,50 @@ func getReceivedComments(db *sql.DB, TargetType string, TargetID int) []Comment 
 	classList := getAllClasses(db)
 	query := fmt.Sprintf("SELECT * FROM Comment WHERE TargetID = '%d' AND TargetType = '%s'", TargetID, TargetType)
 
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	var commentList []Comment
+	for results.Next() {
+		var comment Comment
+		results.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
+		if comment.CreatorType == "Student" {
+			student := linkStudentToID(db, comment.CreatorID, studentList)
+			comment.CreatorName = student.Name
+			println(student.Name)
+		} else if comment.CreatorType == "Tutor" {
+			tutor := linkTutorToID(db, comment.CreatorID, tutorList)
+			comment.CreatorName = tutor.Name
+			println(tutor.Name)
+		}
+		if comment.TargetType == "Student" {
+			student := linkStudentToID(db, comment.TargetID, studentList)
+			comment.TargetName = student.Name
+		} else if comment.TargetType == "Tutor" {
+			tutor := linkTutorToID(db, comment.TargetID, tutorList)
+			comment.TargetName = tutor.Name
+		} else if comment.TargetType == "Module" {
+			module := linkModuleToID(db, comment.TargetID, moduleList)
+			fmt.Print("this is the module: ")
+			fmt.Println(module)
+			comment.TargetName = module.Name
+		} else if comment.TargetType == "Class" {
+			class := linkClassToID(db, comment.TargetID, classList)
+			comment.TargetName = class.Name
+		}
+		fmt.Println(comment)
+		commentList = append(commentList, comment)
+	}
+	return commentList
+}
+
+func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment {
+	studentList := getAllStudents(db)
+	tutorList := getAllTutors(db)
+	moduleList := getAllModules(db)
+	classList := getAllClasses(db)
+	query := fmt.Sprintf("SELECT * FROM Comment WHERE CreatorID = '%d' AND CreatorType = '%s'", CreatorID, CreatorType)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -597,53 +510,147 @@ func getReceivedAnonymousComments(db *sql.DB, TargetType string, TargetID int) [
 	return commentList
 }
 
-func getPostedComments(db *sql.DB, CreatorType string, CreatorID int) []Comment {
-	studentList := getAllStudents(db)
-	tutorList := getAllTutors(db)
-	moduleList := getAllModules(db)
-	classList := getAllClasses(db)
-	query := fmt.Sprintf("SELECT * FROM Comment WHERE CreatorID = '%d' AND CreatorType = '%s'", CreatorID, CreatorType)
-	results, err := db.Query(query)
+func comment(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
-	var commentList []Comment
-	for results.Next() {
-		var comment Comment
-		results.Scan(&comment.CommentID, &comment.CreatorType, &comment.CreatorID, &comment.TargetType, &comment.TargetID, &comment.CommentData, &comment.Anonymous, &comment.DateTimePublished)
-		if comment.CreatorType == "Student" {
-			student := linkStudentToID(db, comment.CreatorID, studentList)
-			comment.CreatorName = student.Name
-			println(student.Name)
-		} else if comment.CreatorType == "Tutor" {
-			tutor := linkTutorToID(db, comment.CreatorID, tutorList)
-			comment.CreatorName = tutor.Name
-			println(tutor.Name)
-		}
-		if comment.TargetType == "Student" {
-			student := linkStudentToID(db, comment.TargetID, studentList)
-			comment.TargetName = student.Name
-		} else if comment.TargetType == "Tutor" {
-			tutor := linkTutorToID(db, comment.TargetID, tutorList)
-			comment.TargetName = tutor.Name
-		} else if comment.TargetType == "Module" {
-			module := linkModuleToID(db, comment.TargetID, moduleList)
-			fmt.Print("this is the module: ")
-			fmt.Println(module)
-			comment.TargetName = module.Name
-		} else if comment.TargetType == "Class" {
-			class := linkClassToID(db, comment.TargetID, classList)
-			comment.TargetName = class.Name
-		}
-		fmt.Println(comment)
-		commentList = append(commentList, comment)
+	params := mux.Vars(r)
+	TargetID := params["id"]
+	TargetIDInt, err := strconv.Atoi(TargetID)
+	if err != nil {
+		panic(err.Error())
 	}
-	return commentList
+	if r.Method == "GET" {
+		var comment = getComment(db, TargetIDInt)
+		fmt.Println(comment)
+		json.NewEncoder(w).Encode(comment)
+	}
+	if r.Method == "PUT" {
+		var comment Comment
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err == nil {
+			json.Unmarshal(reqBody, &comment)
+			updateRecord(db, comment)
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte("201 - Comment Updated!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Comment Info not in JSON format!"))
+		}
+	}
+}
+
+func postComment(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "POST" {
+		var newComment Comment
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err == nil {
+			json.Unmarshal(reqBody, &newComment)
+			insertComment(db, newComment)
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte("201 - Comment Posted!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Comment Info not in JSON format!"))
+		}
+	}
+}
+
+func studentComments(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	studentID := params["studentid"]
+	studentIDint, err := strconv.Atoi(studentID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		studentCommentList := getStudentComments(db, studentIDint)
+		if len(studentCommentList) > 0 {
+			fmt.Println(studentCommentList)
+			json.NewEncoder(w).Encode(studentCommentList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+func tutorComments(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	tutorID := params["tutorid"]
+	tutorIDint, err := strconv.Atoi(tutorID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		tutorCommentList := getTutorComments(db, tutorIDint)
+		if len(tutorCommentList) > 0 {
+			fmt.Println(tutorCommentList)
+			json.NewEncoder(w).Encode(tutorCommentList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func classComments(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	classID := params["classid"]
+	classIDint, err := strconv.Atoi(classID)
+	if err != nil {
+		panic(err.Error())
+	}
+	// handle error
+	if r.Method == "GET" {
+		classCommentList := getClassComments(db, classIDint)
+		if len(classCommentList) > 0 {
+			fmt.Println(classCommentList)
+			json.NewEncoder(w).Encode(classCommentList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+func moduleComments(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	moduleID := params["moduleid"]
+	moduleIDint, err := strconv.Atoi(moduleID)
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "GET" {
+		moduleCommentList := getModuleComments(db, moduleIDint)
+		if len(moduleCommentList) > 0 {
+			fmt.Println(moduleCommentList)
+			json.NewEncoder(w).Encode(moduleCommentList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
 }
 
 //Get all comments received
 func receivedAnonymousComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2Comment")
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -671,7 +678,7 @@ func receivedAnonymousComments(w http.ResponseWriter, r *http.Request) {
 
 //Get all comments received
 func receivedComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2Comment")
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -699,7 +706,7 @@ func receivedComments(w http.ResponseWriter, r *http.Request) {
 
 //Get all comments received
 func postedComments(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:9047)/ETIAssignment2TestDB")
+	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -741,7 +748,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/comment/{id}", comment).Methods("GET", "POST", "PUT")
+	router.HandleFunc("/api/comment/{id}", comment).Methods("GET", "PUT")
+
+	router.HandleFunc("/api/comment/create", postComment).Methods("POST")
 
 	router.HandleFunc("/api/comment/received/{type}/{id}", receivedComments).Methods("GET")
 

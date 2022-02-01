@@ -16,11 +16,17 @@
                 <div class="col-12">
                     <h1 style="text-align: center;">My Comments</h1>
                 </div>
+                <div class="col-6 pt-5" id="allcomments" style="text-align: center;">
+                </div>
+                <div class="col-6 pt-5" id="anoncomments" style="text-align: center;">
+                </div>
             </div>
-            <div id="receivedCommentsHeader" class="mt-4"></div>
+            <div id="receivedCommentsHeader" class="mt-4">
+            </div>
             <div id="receivedComments" style="max-height:60vh !important; overflow-y: scroll;">
                 
             </div>
+            </br>
             </br>
             </br>
             <div id="postedCommentsHeader" class="mt-4"></div>
@@ -36,10 +42,19 @@
         let params = (new URL(url)).searchParams;
         var type = params.get('type');
         var id = params.get('id');
-        getReceivedComments(type,id);
+        document.getElementById('allcomments').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold;" onclick="getReceivedComments(' + "'" + type  + "'" + ',' + "'" + id + "'" + ');' + '"' + '>All Comments</button>';
+        document.getElementById('anoncomments').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold;" onclick="getReceivedAnonComments('+ "'" + type + "'" + ','+ "'" + id + "'" + ');' + '"' + '>Anonymous Comments</button>';
+        $("button").click(function() {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                $(".active").removeClass("active");
+                $(this).addClass('active');
+            }
+        });
+        getReceivedComments(type, id);
         getPostedComments(type,id);
         function getReceivedComments(type, id){
-            document.getElementById('receivedComments').innerHTML = '';
             url = "http://localhost:9041/api/comment/received/" + type + "/" + id;
             $.ajax({
                 type: "GET",
@@ -48,6 +63,24 @@
                     commentsList = JSON.parse(response);
                     console.log(commentsList);
                     displayReceivedComments(commentsList);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                    commentsList = [];
+                    displayReceivedComments(commentsList);
+                }
+            });
+        }
+        function getReceivedAnonComments(type, id){
+            document.getElementById('receivedComments').innerHTML = '';
+            url = "http://localhost:9041/api/comment/received/anonymous/" + type + "/" + id;
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    commentsList = JSON.parse(response);
+                    console.log(commentsList);
+                    displayReceivedComments(commentsList, true);
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -65,7 +98,7 @@
                 success: function (response, textStatus) {
                     commentsList = JSON.parse(response);
                     console.log(commentsList);
-                    displayPostedComments(commentsList);
+                    displayPostedComments(commentsList, false);
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -74,7 +107,8 @@
                 }
             });
         }
-        function displayReceivedComments(commentList){
+        function displayReceivedComments(commentList, anonymous){
+            document.getElementById('receivedComments').innerHTML = "";
             if (commentList.length == 0){
                 document.getElementById('receivedCommentsHeader').innerHTML = '<h3 style="text-align:center;">No Comments Received Yet!</h3>';
             }
@@ -111,7 +145,7 @@
                             object.CommentData  + 
                         '</div>' + 
                     '</div>' ;
-                    document.getElementById('receivedComments').innerHTML += displayData;
+                    document.getElementById('receivedComments').innerHTML = displayData;
                 }
             }     
         }
@@ -150,7 +184,7 @@
                         '</div>' +  
                         '<div class=col-1>' + '<button class="btn btn-warning mt-4"'+ 'onclick="location' + ".href='" + redirectLink +"';" + '">' + 'Edit' + '</button>' + '</div>'
                     '</div>' ;
-                    document.getElementById('postedComments').innerHTML += displayData;
+                    document.getElementById('postedComments').innerHTML = displayData;
                 }
             }     
         }

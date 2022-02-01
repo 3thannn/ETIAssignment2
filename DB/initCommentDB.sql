@@ -13,7 +13,7 @@ CREATE TABLE Comment(
 	TargetID int NOT NULL,	
 	CommentData varchar(500) NOT NULL,
 	Anonymous bool NOT NULL DEFAULT False,
-	DateTimePublished datetime);
+	DateTimePublished datetime DEFAULT NOW());
     
 INSERT INTO Comment(CommentData, CreatorID, CreatorType, TargetID, TargetType, DateTimePublished, Anonymous) 
 VALUES

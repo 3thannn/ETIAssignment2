@@ -70,6 +70,7 @@ func getAllTutors(db *sql.DB) []Object {
 	return tutorList
 }
 
+//Gets all Class Name which is tied to ClassID
 func getAllClasses(db *sql.DB) []Object {
 	url := "http://classcontainer:9046/api/class"
 	response, err := http.Get(url)
@@ -228,7 +229,7 @@ func getClassRatings(db *sql.DB, targetID int) []Rating {
 	var classRatingList []Rating
 	for classresults.Next() {
 		var rating Rating
-		classresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, rating.DateTimePublished)
+		classresults.Scan(&rating.RatingID, &rating.CreatorID, &rating.CreatorType, &rating.TargetID, &rating.TargetType, &rating.RatingScore, &rating.Anonymous, &rating.DateTimePublished)
 		if rating.Anonymous == 0 {
 			if rating.CreatorType == "Student" {
 				student := linkStudentToID(db, rating.CreatorID, studentList)
@@ -599,6 +600,28 @@ func rating(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func createRating(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
+	// handle error
+	if err != nil {
+		panic(err.Error())
+	}
+	if r.Method == "POST" {
+		var newRating Rating
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err == nil {
+			json.Unmarshal(reqBody, &newRating)
+			fmt.Println(newRating)
+			postRating(db, newRating)
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte("201 - Rating Posted!"))
+		} else {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Please enter trip detais in JSON format!"))
+		}
+	}
+}
+
 //Get all Ratings received
 func receivedRatings(w http.ResponseWriter, r *http.Request) {
 	println("This ran in receivedRatings")
@@ -701,7 +724,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
-	router.HandleFunc("/api/rating/{id}", rating).Methods("GET", "POST", "PUT")
+	router.HandleFunc("/api/rating/{id}", rating).Methods("GET", "PUT")
+
+	router.HandleFunc("/api/rating/create", createRating).Methods("POST")
 
 	router.HandleFunc("/api/rating/received/{type}/{id}", receivedRatings).Methods("GET")
 

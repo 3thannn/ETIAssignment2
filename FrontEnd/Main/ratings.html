@@ -16,6 +16,10 @@
                 <div class="col-12">
                     <h1 style="text-align: center;">My Ratings</h1>
                 </div>
+                <div class="col-6 pt-5" id="allratings" style="text-align: center;">
+                </div>
+                <div class="col-6 pt-5" id="anonratings" style="text-align: center;">
+                </div>
             </div>
             <div id="receivedRatingsHeader" class="mt-4"></div>
             <div id="receivedRatings" style="max-height:60vh !important; overflow-y: scroll;">
@@ -36,11 +40,38 @@
         let params = (new URL(url)).searchParams;
         var type = params.get('type');
         var id = params.get('id');
+        document.getElementById('allratings').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold;" onclick="getReceivedRatings(' + "'" + type  + "'" + ',' + "'" + id + "'" + ');' + '"' + '>All Ratings</button>';
+        document.getElementById('anonratings').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold;" onclick="getReceivedAnonRatings('+ "'" + type + "'" + ','+ "'" + id + "'" + ');' + '"' + '>Anonymous Raings</button>';
+        $("button").click(function() {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                $(".active").removeClass("active");
+                $(this).addClass('active');
+            }
+        });
         getReceivedRatings(type,id);
         getPostedRatings(type,id);
         function getReceivedRatings(type, id){
-            document.getElementById('receivedRatings').innerHTML = '';
             url = "http://localhost:9042/api/rating/received/" + type + "/" + id;
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response, textStatus) {
+                    ratingsList = JSON.parse(response);
+                    console.log(ratingsList);
+                    displayReceivedRatings(ratingsList);
+                },
+                error: function (textStatus, errorThrown, response) {
+                    console.log(response);
+                    ratingsList = [];
+                    displayReceivedRatings(ratingsList);
+                }
+            });
+        }
+        function getReceivedAnonRatings(type, id){
+            document.getElementById('receivedRatings').innerHTML = '';
+            url = "http://localhost:9042/api/rating/received/Anonymous" + type + "/" + id;
             $.ajax({
                 type: "GET",
                 url: url,
@@ -109,7 +140,7 @@
                         '<div class="col-8" id="' + colID + '">' + 
                         '</div>' + 
                     '</div>' ;
-                    document.getElementById('receivedRatings').innerHTML += displayData;
+                    document.getElementById('receivedRatings').innerHTML = displayData;
                     for (y = 0; y < parseInt(object.RatingScore); y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
                     }
@@ -156,7 +187,7 @@
                         '</div>' + 
                         '<div class=col-1>' + '<button class="btn btn-warning mt-4"'+ 'onclick="location' + ".href='" + redirectLink +"';" + '">' + 'Edit' + '</button>' + '</div>'
                     '</div>' ;
-                    document.getElementById('postedRatings').innerHTML += displayData;
+                    document.getElementById('postedRatings').innerHTML = displayData;
                     for (y = 0; y < parseInt(object.RatingScore); y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
                     }

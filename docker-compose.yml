@@ -1,12 +1,12 @@
 version: '3.3'
 
 services:
-  # MYSQL Database
+  #MYSQL Database
   db1:
     container_name: etiassignment2commentdb3.9
     build:
       context: ./DB
-      dockerfile: Dockerfile.commentdb
+      dockerfile: commentdb.Dockerfile
     networks:
       - assignment2bridge
     environment:
@@ -19,12 +19,12 @@ services:
         condition: on-failure
     volumes:
       - etiassignment2volume1:/var/lib/mysql
-    image: ethanhaseaten/etiassignment2testdb
+    #image: ethanhaseaten/etiassignment2commentdb
   db2:
     container_name: etiassignment2ratingdb3.9
     build:
       context: ./DB
-      dockerfile: Dockerfile.ratingdb
+      dockerfile: ratingdb.Dockerfile
     networks:
       - assignment2bridge
     environment:
@@ -37,12 +37,12 @@ services:
         condition: on-failure
     volumes:
       - etiassignment2volume2:/var/lib/mysql
-    image: ethanhaseaten/etiassignment2testdb
+    #image: ethanhaseaten/etiassignment2ratingdb
   db3:
     container_name: etiassignment2testdb3.9
     build:
       context: ./DB
-      dockerfile: Dockerfile.testdb
+      dockerfile: testdb.Dockerfile
     networks:
       - assignment2bridge
     environment:
@@ -55,7 +55,7 @@ services:
         condition: on-failure
     volumes:
       - etiassignment2volume3:/var/lib/mysql
-    image: ethanhaseaten/etiassignment2testdb
+    #image: ethanhaseaten/etiassignment2testdb
 
   # Frontend HTML
   frontend:
@@ -78,7 +78,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    image: ethanhaseaten/frontendcontainer
+    #image: ethanhaseaten/frontendcontainer
     networks:
       - assignment2bridge
   # Comment Microservice
@@ -91,7 +91,7 @@ services:
     container_name: commentcontainer3.9
     ports:
       - 9041:9041
-    image: ethanhaseaten/commentcontainer
+    #image: ethanhaseaten/commentcontainer
     networks:
       - assignment2bridge
 
@@ -105,7 +105,7 @@ services:
     container_name: ratingcontainer3.9
     ports:
       - 9042:9042
-    image: ethanhaseaten/ratingcontainer
+    #image: ethanhaseaten/ratingcontainer
     networks:
       - assignment2bridge
 
@@ -119,7 +119,7 @@ services:
     container_name: studentcontainer3.9
     ports:
       - 9043:9043
-    image: ethanhaseaten/studentcontainer
+    #image: ethanhaseaten/studentcontainer
     networks:
       - assignment2bridge
 
@@ -133,7 +133,7 @@ services:
     container_name: tutorcontainer3.9
     ports:
       - 9044:9044
-    image: ethanhaseaten/tutorcontainer
+    #image: ethanhaseaten/tutorcontainer
     networks:
       - assignment2bridge
 
@@ -147,7 +147,7 @@ services:
     container_name: modulecontainer3.9
     ports:
       - 9045:9045
-    image: ethanhaseaten/modulecontainer
+    #image: ethanhaseaten/modulecontainer
     networks:
       - assignment2bridge
   # Module Microservice
@@ -160,7 +160,7 @@ services:
     container_name: classcontainer3.9
     ports:
       - 9046:9046
-    image: ethanhaseaten/classcontainer
+    #image: ethanhaseaten/classcontainer
     networks:
       - assignment2bridge
 networks:
