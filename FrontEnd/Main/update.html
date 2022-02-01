@@ -71,7 +71,7 @@
             });
         }
         function displayRatingForm(rating){
-            var backurl = 'C:/projects/src/ETIAssignment2/FrontEnd/Main/ratings.html?id=' + rating.CreatorID + "&type=" + rating.CreatorType;
+            var backurl = '../Main/ratings.html?id=' + rating.CreatorID + "&type=" + rating.CreatorType;
             document.getElementById('formheader').innerHTML = '<h3>Edit Rating</h3>';
             document.getElementById('formbody').innerHTML += 
             '<form id="commentForm" onsubmit="return ratingData(this);">' +
@@ -124,7 +124,7 @@
                 '</div>' +
                 '<br>' +
                 '<button type="submit" class="btn btn-primary">Submit</button>' +
-                '<a class="btn btn-danger" style="color:white;" href=' + backurl + '>Back</a>' +
+                '<a class="btn btn-danger  ml-2" style="color:white;" href=' + backurl + '>Back</a>' +
             '</form>';
             document.getElementById('RatingID').value = rating.RatingID;
             document.getElementById('CreatorType').value = rating.CreatorType;
@@ -134,7 +134,7 @@
             document.getElementById('Anonymous').value = rating.Anonymous;
         }
         function displayCommentForm(comment){
-            var backurl = 'C:/projects/src/ETIAssignment2/FrontEnd/Main/comments.html?id=' + comment.CreatorID + "&type=" + comment.CreatorType;
+            var backurl = '../Main/comments.html?id=' + comment.CreatorID + "&type=" + comment.CreatorType;
             document.getElementById('formheader').innerHTML = '<h3>Edit Comment</h3>';
             document.getElementById('formbody').innerHTML += 
             '<form id="commentForm" onsubmit="return commentData(this);">' + 
@@ -169,7 +169,7 @@
                 '</div>'+
                 '</br>'+
                 '<button type="submit" class="btn btn-primary">Submit</button>' +
-                '<a class="btn btn-danger" style="color:white;" href=' + backurl + '>Back</a>' +
+                '<a class="btn btn-danger ml-2" style="color:white;" href=' + backurl + '>Back</a>' +
             '</form>';
             document.getElementById('CommentID').value = comment.CommentID;
             document.getElementById('CreatorType').value = comment.CreatorType;
@@ -177,7 +177,9 @@
             document.getElementById('TargetType').value = comment.TargetType;
             document.getElementById('TargetID').value = comment.TargetID;
             document.getElementById('CommentData').value = comment.CommentData;
-            document.getElementById('Anonymous').value = comment.Anonymous;
+            if (comment.Anonymous == 1){
+                 $('#Anonymous').prop('checked', true);
+            }
         }
         function commentData(form) {
             event.preventDefault();
@@ -195,6 +197,9 @@
             updateComment(jsonString2, url)
         }
         function updateComment(jsonString, urlString) {
+            const obj = JSON.parse(jsonString);
+            var type = obj.CreatorType;
+            var id = obj.CreatorID;
             $.ajax({
                 type: "PUT",
                 url: urlString,
@@ -203,8 +208,7 @@
                 success: function (response, textStatus) {
                     alert("Successfully Updated Comment!");
                     document.getElementById("commentForm").reset();
-                    var comment = JSON.parse(jsonString);
-                    //window.location.href = "C:/projects/src/ETIAssignment2/FrontEnd/Main/comments.html?id=" + obj.CreatorID + "&type=" + obj.CreatorType;
+                    window.location.href = "../Main/comments.html?id=" + id + "&type=" + type;
                 },
                 error: function (textStatus, errorThrown) {
                     alert("Error:" + textStatus.responseText);
@@ -227,6 +231,9 @@
             updateRating(jsonString2, url)
         }
         function updateRating(jsonString, urlString) {
+            const obj = JSON.parse(jsonString);
+            var type = obj.CreatorType;
+            var id = obj.CreatorID;
             $.ajax({
                 type: "PUT",
                 url: urlString,
@@ -235,7 +242,7 @@
                 success: function (response, textStatus) {
                     alert("Successfully Updated Rating!");
                     document.getElementById("commentForm").reset();
-                    //window.location.href = "C:/projects/src/ETIAssignment2/FrontEnd/Main/ratings.html?id=" + obj.CreatorID + "&type=" + obj.CreatorType;
+                    window.location.href = "../Main/ratings.html?id=" + id + "&type=" + type;
                 },
                 error: function (textStatus, errorThrown) {
                     alert("Error:" + textStatus.responseText);
