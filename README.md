@@ -6,6 +6,23 @@
 | Comment API  | 9091 | http://10.31.11.12:9041 |
 | Rating API  | 9092 | http://10.31.11.12:9042 |
 
+## Front End Webpage Routes
+```sh
+# 1. Comments and Ratings Dashboard
+# (Comments and Ratings be posted and seen by first selecting target through this page)
+http://10.31.11.12:9040/Main/dashboard.html
+
+# 2. Specific student feedback
+http://10.31.11.12:9040/Main/dashboard
+
+# 3. Personal posted and received ratings
+http://10.31.11.12:9040/Main/ratings
+
+# 4. Personal posted and received comments
+http://10.31.11.12:9040/Main/comments
+
+```
+
 ## Documentation
 
 ### Comment Data Structure
