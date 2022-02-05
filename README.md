@@ -68,7 +68,6 @@ Create Comment
 http://10.31.11.12:9041/api/comment
 #### Response
 Status code 201 if successful, else an error code with a corresponding status message will be returned if unsuccessful. 
-```
 
 ### [GET] /api/comment/received/{type}/{id}
 Get received comments by user type and id
@@ -130,10 +129,10 @@ Status code 200 if successful, else an error code with a corresponding status me
 ### [GET] /api/comment/module/{id}
 Get comments for all students, tutor, classes or modules.
 #### Endpoint
-http://10.31.11.12:9041/api/comment/student/{id}
-http://10.31.11.12:9041/api/comment/tutor/{id}
-http://10.31.11.12:9041/api/comment/class/{id}
-http://10.31.11.12:9041/api/comment/module/{id}
+http://10.31.11.12:9041/api/comment/student/{id}<br />
+http://10.31.11.12:9041/api/comment/tutor/{id}<br />
+http://10.31.11.12:9041/api/comment/class/{id}<br />
+http://10.31.11.12:9041/api/comment/module/{id}<br />
 #### Response
 Status code 200 if successful, else an error code with a corresponding status message will be returned if unsuccessful. 
 
