@@ -110,6 +110,8 @@ func getAllModules(db *sql.DB) []Object {
 	}
 	return moduleList
 }
+
+//links student name to id
 func linkStudentToID(db *sql.DB, id string, studentList []Object) Object {
 	var student Object
 	for _, student := range studentList {
@@ -120,6 +122,7 @@ func linkStudentToID(db *sql.DB, id string, studentList []Object) Object {
 	return student
 }
 
+//links tutor name to id
 func linkTutorToID(db *sql.DB, id string, tutorList []Object) Object {
 	var tutor Object
 	for _, tutor := range tutorList {
@@ -130,6 +133,7 @@ func linkTutorToID(db *sql.DB, id string, tutorList []Object) Object {
 	return tutor
 }
 
+//links class name to id
 func linkClassToID(db *sql.DB, id string, classList []Object) Object {
 	var class Object
 	for _, class := range classList {
@@ -140,6 +144,7 @@ func linkClassToID(db *sql.DB, id string, classList []Object) Object {
 	return class
 }
 
+//links module name to id
 func linkModuleToID(db *sql.DB, id string, moduleList []Object) Object {
 	var module Object
 	for _, module := range moduleList {
@@ -150,6 +155,7 @@ func linkModuleToID(db *sql.DB, id string, moduleList []Object) Object {
 	return module
 }
 
+// gets comment from db by id
 func getComment(db *sql.DB, CommentId string) Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
@@ -360,6 +366,8 @@ func insertComment(db *sql.DB, comment Comment) {
 	}
 }
 
+//3.9.1 Update Comment
+//Update comment
 func updateRecord(db *sql.DB, comment Comment) {
 	fmt.Println(comment)
 	CommentID := comment.CommentID
@@ -419,6 +427,8 @@ func getReceivedComments(db *sql.DB, TargetType string, TargetID string) []Comme
 	return commentList
 }
 
+//3.9.4 List ratings given
+//Gets posted comments
 func getPostedComments(db *sql.DB, CreatorType string, CreatorID string) []Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
@@ -463,6 +473,7 @@ func getPostedComments(db *sql.DB, CreatorType string, CreatorID string) []Comme
 	return commentList
 }
 
+//3.9.3
 //Get all anonymous comments received
 func getReceivedAnonymousComments(db *sql.DB, TargetType string, TargetID string) []Comment {
 	studentList := getAllStudents(db)
@@ -524,6 +535,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(comment)
 		json.NewEncoder(w).Encode(comment)
 	}
+	//3.9.1 Update Rating
 	if r.Method == "PUT" {
 		var comment Comment
 		reqBody, err := ioutil.ReadAll(r.Body)
@@ -539,6 +551,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//3.9.1 Post comment
 func postComment(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:password@tcp(db1:9047)/ETIAssignment2Comment")
 	if err != nil {

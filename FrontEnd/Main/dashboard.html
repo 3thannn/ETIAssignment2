@@ -41,16 +41,13 @@
             }
         });
         getStudents();
-
+        //code to display the various different objects for students, tutors, classes and modules using innerhtml
         function displayCards(List, objectType){
             for (i = 0; i < List.length; i ++) {
                 object = List[i];
                 var ID = object.ID
-                console.log(ID);
                 var redirectLink = "../Main/details.html?id=" + ID + '&type=' + objectType;
-                console.log(redirectLink);
                 stringdata = '<div class="col-lg-4 col-md-6 col-sm-12 pt-3"' +  'onclick="location' + ".href='" + redirectLink +"';" + '">';
-                console.log(stringdata)
                 document.getElementById('userDiv').innerHTML += 
                 stringdata + 
                     '<div style="height: 100px; background-color: lightgray; border-radius: 10px;">' + 
@@ -61,6 +58,7 @@
                 '</div>' 
             }
         }
+        //Gets all students
         function getStudents(){
             document.getElementById('userDiv').innerHTML = '';
             url = "http://10.31.11.12:9043/api/student";
@@ -77,6 +75,7 @@
                 }
             });
         }
+         //Gets all tutors
         function getTutors(){
             document.getElementById('userDiv').innerHTML = '';
             url = "http://10.31.11.12:9044/api/tutor";
@@ -93,6 +92,7 @@
                 }
             });
         }
+         //Gets all modules
         function getModules(){
             document.getElementById('userDiv').innerHTML = '';
             url = "http://10.31.11.12:9045/api/module";
@@ -109,6 +109,7 @@
                 }
             });
         }
+         //Gets all classes
         function getClasses(){
             document.getElementById('userDiv').innerHTML = '';
             url = "http://10.31.11.12:9046/api/class";
@@ -125,8 +126,8 @@
                 }
             });
         }
+         //Gets all comments
         function getComments(object){
-            console.log("runs getComments");
             url = document.URL;
             var type = url.substring(url.lastIndexOf('?') + 1);
             var url1 = "http://10.31.11.12:9041/api/comment/" + type.toLowerCase();

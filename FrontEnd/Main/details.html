@@ -36,6 +36,7 @@
         url = document.URL;
         let params = (new URL(url)).searchParams;
         var type = params.get('type');
+         //Set button onclick calls based on url params
         if(type == "Student"){
             document.getElementById('commentsButton').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getStudent(' + "'comments'" + ')"' + '>Comments</button>';
             document.getElementById('ratingsButton').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold; width: 200px;" onclick="' + 'getStudent(' + "'ratings'" + ')"' + '>Ratings</button>';
@@ -64,6 +65,7 @@
                 $(this).addClass('active');
             }
         });
+        //Get students
         function getStudent(displayChoice){
             console.log("runs getStudent");
             url = document.URL;
@@ -91,6 +93,7 @@
                 }
             });
         }
+         //Get tutors
         function getTutor(displayChoice){
             url = document.URL;
             let params = (new URL(url)).searchParams;
@@ -116,6 +119,7 @@
                 }
             });
         }
+         //Get modules
         function getModule(displayChoice){
             url = document.URL;
             let params = (new URL(url)).searchParams;
@@ -141,6 +145,7 @@
                 }
             });
         }
+        //gets classes
         function getClass(displayChoice){
             url = document.URL;
             let params = (new URL(url)).searchParams;
@@ -166,6 +171,7 @@
                 }
             });
         }
+        //gets comments for particular object based on type and id
         function getComments(object){
             console.log("runs getComments");
             url = document.URL;
@@ -195,7 +201,7 @@
                 }
             });
         }
-        
+        //get ratings for particular object based on type and id
         function getRatings(object){
             console.log("runs getRating");
             url = document.URL;
@@ -227,6 +233,7 @@
                 }
             });
         }
+        //Code to display object's received comments using innerhtml as well as comment form
         function displayCommentData(object, commentList, type){
             console.log("runs displayCommentData");
             url = document.URL;
@@ -302,6 +309,7 @@
                        
             document.getElementById("form").innerHTML = formData;
         }
+        //Convert necessary input data to its correct data type
         function createdCommentData(form) {
             event.preventDefault();
             const data = new FormData(form);
@@ -312,6 +320,7 @@
             console.log(jsonString2);
             createComment(jsonString2, "http://10.31.11.12:9041/api/comment/create");
         }
+        //Create Comment
         function createComment(jsonString, urlString) {
             $.ajax({
                 type: "POST",
@@ -329,6 +338,7 @@
                 }
             });
         }
+        //Code to display object's received ratings using innerhtml as well as rating form
         function displayRatingData(object, ratingList, type){
             url = document.URL;
             let params = (new URL(url)).searchParams;
@@ -445,6 +455,7 @@
                        
             document.getElementById("form").innerHTML = formData;
         }
+         //Convert necessary input data to its correct data type
         function createdRatingData(form) {
             event.preventDefault();
             const data = new FormData(form);
@@ -456,6 +467,7 @@
             console.log(jsonString2);
             createRating(jsonString2, "http://10.31.11.12:9042/api/rating/create");
         }
+        //Create rating
         function createRating(jsonString, urlString) {
             $.ajax({
                 type: "POST",

@@ -50,6 +50,7 @@
         });
         getReceivedRatings(type,id);
         getPostedRatings(type,id);
+        //Get reeived ratings from rating microservice
         function getReceivedRatings(type, id){
             url = "http://10.31.11.12:9042/api/rating/received/" + type + "/" + id;
             $.ajax({
@@ -73,6 +74,7 @@
                 }
             });
         }
+         //Get reeived anonymous ratings from rating microservice
         function getReceivedAnonRatings(type, id){
             document.getElementById('receivedRatings').innerHTML = '';
             url = "http://10.31.11.12:9042/api/rating/received/Anonymous" + type + "/" + id;
@@ -97,6 +99,7 @@
                 }
             });
         }
+         //Get posyed ratings from rating microservice
         function getPostedRatings(type, id){
             document.getElementById('postedRatings').innerHTML = '';
             url = "http://10.31.11.12:9042/api/rating/posted/" + type + "/" + id;
@@ -121,6 +124,7 @@
                 }
             });
         }
+        //Code to display received ratings using innerhtml
         function displayReceivedRatings(ratingsList){
             if (ratingsList.length == 0){
                 document.getElementById('receivedRatingsHeader').innerHTML = '<h3 style="text-align:center;">No Ratings Received Yet!</h3>';
@@ -167,6 +171,7 @@
                 }
             }     
         }
+        //Code to display posyed ratings using innerhtml
         function displayPostedRatings(ratingsList){
             if (ratingsList.length == 0){
                 document.getElementById('postedRatingsHeader').innerHTML = '<h3 style="text-align:center;">No Ratings Posted Yet!</h3>';

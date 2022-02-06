@@ -52,6 +52,7 @@
         });
         getReceivedComments(type, id);
         getPostedComments(type,id);
+        //Gets Received comments from comment microservice
         function getReceivedComments(type, id){
             url = "http://10.31.11.12:9041/api/comment/received/" + type + "/" + id;           
             $.ajax({
@@ -75,6 +76,7 @@
                 }
             });
         }
+        //Get Anonymous received comments from comment microservice
         function getReceivedAnonComments(type, id){
             document.getElementById('receivedComments').innerHTML = '';
             url = "http://10.31.11.12:9041/api/comment/received/anonymous/" + type + "/" + id;           
@@ -100,6 +102,7 @@
                 }
             });
         }
+        //get comments posted from comment microservice
         function getPostedComments(type, id){
             document.getElementById('postedComments').innerHTML = '';
             url = "http://10.31.11.12:9041/api/comment/posted/" + type + "/" + id;
@@ -123,6 +126,7 @@
                 }
             });
         }
+        //Code to display received comments using innerhtml
         function displayReceivedComments(commentList, anonymous){
             document.getElementById('receivedComments').innerHTML = "";
             if (commentList.length == 0){
@@ -165,6 +169,7 @@
                 }
             }     
         }
+        //Code to display posted comments using innerhtml
         function displayPostedComments(commentList){
             if (commentList.length == 0){
                 document.getElementById('postedCommentsHeader').innerHTML = '<h3 style="text-align:center;">No Comments Posted Yet!</h3>';
