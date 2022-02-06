@@ -36,10 +36,8 @@
         </div>
     </body>
     <script>
-        url = document.URL;
-        let params = (new URL(url)).searchParams;
-        var type = params.get('type');
-        var id = params.get('id');
+         var type = "Tutor";
+        var id = 1;
         document.getElementById('allratings').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold;" onclick="getReceivedRatings(' + "'" + type  + "'" + ',' + "'" + id + "'" + ');' + '"' + '>All Ratings</button>';
         document.getElementById('anonratings').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold;" onclick="getReceivedAnonRatings('+ "'" + type + "'" + ','+ "'" + id + "'" + ');' + '"' + '>Anonymous Raings</button>';
         $("button").click(function() {
