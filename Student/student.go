@@ -113,16 +113,6 @@ func main() {
 
 	router.HandleFunc("/api/getstudent/{studentid}", student).Methods("GET")
 
-	// router.HandleFunc("/api/Rating/student/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/class/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/module/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/tutor/sent/{CreatorID}", postedRatings).Methods("GET")
-
-	// router.HandleFunc("/api/Rating/received/{CreatorID}", receivedRatings).Methods("GET")
-
 	fmt.Println("Listening at port 9043")
 	log.Fatal(http.ListenAndServe(":9043", handlers.CORS(headers, origins, methods)(router)))
 }

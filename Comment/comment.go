@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -151,12 +150,12 @@ func linkModuleToID(db *sql.DB, id string, moduleList []Object) Object {
 	return module
 }
 
-func getComment(db *sql.DB, CommentId int) Comment {
+func getComment(db *sql.DB, CommentId string) Comment {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
 	classList := getAllClasses(db)
-	query := fmt.Sprintf("SELECT * FROM Comment WHERE CommentID = '%d';", CommentId)
+	query := fmt.Sprintf("SELECT * FROM Comment WHERE CommentID = '%s';", CommentId)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -517,12 +516,11 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	}
 	params := mux.Vars(r)
 	TargetID := params["id"]
-	TargetIDInt, err := strconv.Atoi(TargetID)
 	if err != nil {
 		panic(err.Error())
 	}
 	if r.Method == "GET" {
-		var comment = getComment(db, TargetIDInt)
+		var comment = getComment(db, TargetID)
 		fmt.Println(comment)
 		json.NewEncoder(w).Encode(comment)
 	}
@@ -586,7 +584,7 @@ func tutorComments(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	tutorID := params["tutorid"]
 	if r.Method == "GET" {
-		tutorCommentList := getTutorComments(db, tutorID)
+		var tutorCommentList []Comment = getTutorComments(db, tutorID)
 		if len(tutorCommentList) > 0 {
 			fmt.Println(tutorCommentList)
 			json.NewEncoder(w).Encode(tutorCommentList)
@@ -605,7 +603,7 @@ func classComments(w http.ResponseWriter, r *http.Request) {
 	classID := params["classid"]
 	// handle error
 	if r.Method == "GET" {
-		classCommentList := getClassComments(db, classID)
+		var classCommentList []Comment = getClassComments(db, classID)
 		if len(classCommentList) > 0 {
 			fmt.Println(classCommentList)
 			json.NewEncoder(w).Encode(classCommentList)
@@ -622,7 +620,7 @@ func moduleComments(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	moduleID := params["moduleid"]
 	if r.Method == "GET" {
-		moduleCommentList := getModuleComments(db, moduleID)
+		var moduleCommentList []Comment = getModuleComments(db, moduleID)
 		if len(moduleCommentList) > 0 {
 			fmt.Println(moduleCommentList)
 			json.NewEncoder(w).Encode(moduleCommentList)

@@ -55,7 +55,7 @@
         getReceivedComments(type, id);
         getPostedComments(type,id);
         function getReceivedComments(type, id){
-            url = "http://localhost:9041/api/comment/received/" + type + "/" + id;           
+            url = "http://10.31.11.12:9041/api/comment/received/" + type + "/" + id;           
             $.ajax({
                 type: "GET",
                 url: url,
@@ -79,7 +79,7 @@
         }
         function getReceivedAnonComments(type, id){
             document.getElementById('receivedComments').innerHTML = '';
-            url = "http://localhost:9041/api/comment/received/anonymous/" + type + "/" + id;           
+            url = "http://10.31.11.12:9041/api/comment/received/anonymous/" + type + "/" + id;           
             $.ajax({
                 type: "GET",
                 url: url,
@@ -104,7 +104,7 @@
         }
         function getPostedComments(type, id){
             document.getElementById('postedComments').innerHTML = '';
-            url = "http://localhost:9041/api/comment/posted/" + type + "/" + id;
+            url = "http://10.31.11.12:9041/api/comment/posted/" + type + "/" + id;
             $.ajax({
                 type: "GET",
                 url: url,

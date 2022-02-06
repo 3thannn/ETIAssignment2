@@ -100,13 +100,12 @@ func testcode(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// This is t allow the headers, origins and methods all to access CORS resourcesaring
-	headers := handlers.AllowedHeaders([]string{"X-Reqested-With", "Content-Type"})
+	// This is to allow the headers, origins and methods all to access CORS resource sharing
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 
 	router := mux.NewRouter()
-
 	router.HandleFunc("/api/test", testcode).Methods("GET")
 
 	router.HandleFunc("/api/module", modules).Methods("GET")

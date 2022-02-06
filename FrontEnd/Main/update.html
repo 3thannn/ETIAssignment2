@@ -39,7 +39,7 @@
         function getRating(id){
             document.getElementById('formheader').innerHTML = '';
             document.getElementById('formbody').innerHTML = '';
-            url = "http://localhost:9042/api/rating/" + id;
+            url = "http://10.31.11.12:9042/api/rating/" + id;
             $.ajax({
                 type: "GET",
                 url: url,
@@ -56,7 +56,7 @@
         function getComment(id){
             document.getElementById('formheader').innerHTML = '';
             document.getElementById('formbody').innerHTML = '';
-            url = "http://localhost:9041/api/comment/" + id;
+            url = "http://10.31.11.12:9041/api/comment/" + id;
             $.ajax({
                 type: "GET",
                 url: url,
@@ -193,7 +193,7 @@
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);
-            var url = "http://localhost:9041/api/comment/" + obj.CommentID ;
+            var url = "http://10.31.11.12:9041/api/comment/" + obj.CommentID ;
             updateComment(jsonString2, url)
         }
         function updateComment(jsonString, urlString) {
@@ -227,7 +227,7 @@
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);
-            var url = "http://localhost:9042/api/rating/" + obj.RatingID ;
+            var url = "http://10.31.11.12:9042/api/rating/" + obj.RatingID ;
             updateRating(jsonString2, url)
         }
         function updateRating(jsonString, urlString) {
