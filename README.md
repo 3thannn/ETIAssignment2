@@ -6,6 +6,34 @@
 | Comment API  | 9091 | http://10.31.11.12:9041 |
 | Rating API  | 9092 | http://10.31.11.12:9042 |
 
+## Design Considerations
+Following the Microservice ideology, having a loosely coupled system would mean that functional components should be seperated and be able to run independently of each other.
+In the EDUFI Application, there are a total of 23 packages, all split into different functionalities.
+My package is in charge of the Comments and Ratings for Students.
+They will be able to view comments and ratings for other Students, Tutors, Modules and Classes respectively.
+They are also able to create such comments and ratings, if they are logged in.
+They are able to view all comments and ratings received, seperated by anonymous and all.
+Finally they are also able to view their posted comments and ratings.
+
+My package consists of 3 different microservices, and are in charge of all things related to ratings and comments for the EDUFI application.
+The 3 Microservices - Comment Rating both run independently, and has its own database which contains the Comment Table and Rating Table respectively, while the Front End microserice which takes care of the front end pages, use apache webhosting to render the pages. If the comment microservice were to suddenly stop functioning, the Rating microservice will be fully functional following the loosely coupled ideology and practice of Mircoservices.
+
+My package and microservices rely on 5 other microservices to run.
+1. Student Microservice
+2. Tutor Microservice
+3. Class Microservice
+4. Module Microservice
+
+From these Microservices, the different objects can be retrieved, and thus linked to the comments/ratings stored in my microservices as either the creator, or target of the Comment/Rating.
+
+## Front End
+Front End calls to the backend APIs are through AJAX, where the resulting successful response will be in jsonstring, which can be used through javascript to be displayed through html code for the user to see on the webpage.
+Bootstrap was used for the simplicity of styling the frontend pages.
+
+## Backend
+MySQL was used for the databases purely out of simplicity. It is not the lightest framework to use, however it is widely supported throughout the industry, and I am most comfortable with it.
+
+
 ## Front End Webpage Routes
 ```sh
 # 1. Comments and Ratings Dashboard
@@ -223,3 +251,4 @@ Status code 200 if successful, else an error code with a corresponding status me
 "CreatorName":"Kester",
 "TargetName":"Ethan"}
 ```
+
