@@ -178,9 +178,15 @@
                 type: "GET",
                 url: fullurl,
                 success: function (response, textStatus) {
-                    commentList = JSON.parse(response);
-                    console.log(commentList);
-                    displayCommentData(object, commentList, type);
+                    if (textStatus == "success"){
+                        commentList = JSON.parse(response);
+                        console.log(commentList);
+                        displayCommentData(object, commentList, type);
+                    }
+                    else{
+                        commentList = [];
+                        displayCommentData(object, commentList, type);
+                    }
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -203,10 +209,16 @@
                 type: "GET",
                 url: fullurl,
                 success: function (response, textStatus) {
-                    ratingList = JSON.parse(response);
-                    console.log(ratingList);
-                    console.log(ratingList.length);
-                    displayRatingData(object, ratingList, type);
+                    if (textStatus == "success"){
+                        ratingList = JSON.parse(response);
+                        console.log(ratingList);
+                        console.log(ratingList.length);
+                        displayRatingData(object, ratingList, type);
+                    }
+                    else{
+                        ratingList = [];
+                        displayRatingData(object, ratingList, type);
+                    }
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);

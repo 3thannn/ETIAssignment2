@@ -7,7 +7,7 @@
 | Rating API  | 9092 | http://10.31.11.12:9042 |
 
 ## Design Considerations
-![StructureDiagram](Images/ETIAssignment2Diagram.png)
+![StructureDiagram](images/ETIAssignment2Diagram.PNG)
 Following the Microservice ideology, having a loosely coupled system would mean that functional components should be seperated and be able to run independently of each other.
 In the EDUFI Application, there are a total of 23 packages, all split into different functionalities.
 My package is in charge of the Comments and Ratings for Students.
@@ -260,28 +260,4 @@ Status code 200 if successful, else an error code with a corresponding status me
 "CreatorName":"Kester",
 "TargetName":"Ethan"}
 ```
-### 4.1. Backend Start Up
-## Server 
-```
-cd s10185214
-git checkout server
-docker-compose build --no-cache
-docker-compose up -d
-
-```
-
-## Local 
-```
-git clone https://github.com/3thannn/ETIAssignment2
-cd to the folder cloned into
-git checkout dockerize
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-## Contact
-
-Ethan Leong - [School Email](mailto:s10185214@connect.np.edu.sg)
-
-Project Link: [https://github.com/EchoKes/Assignment2](https://github.com/EchoKes/Assignment2)
 
