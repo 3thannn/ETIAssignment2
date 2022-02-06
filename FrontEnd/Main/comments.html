@@ -38,7 +38,7 @@
         </div>
     </body>
     <script>
-        var type = "Tutor";
+        var type = "Student";
         var id = 1;
         document.getElementById('allcomments').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold;" onclick="getReceivedComments(' + "'" + type  + "'" + ',' + "'" + id + "'" + ');' + '"' + '>All Comments</button>';
         document.getElementById('anoncomments').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold;" onclick="getReceivedAnonComments('+ "'" + type + "'" + ','+ "'" + id + "'" + ');' + '"' + '>Anonymous Comments</button>';
@@ -58,7 +58,7 @@
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                                      if (textStatus == "success"){
+                    if (textStatus == "success"){
                         commentsList = JSON.parse(response);
                         console.log(commentsList);
                         displayReceivedComments(commentsList, true);

@@ -53,7 +53,7 @@ func getAllStudents(db *sql.DB) []Object {
 
 //Gets all Tutor's Names which is tied to TutorID
 func getAllTutors(db *sql.DB) []Object {
-	url := "http://tutorcontainer:9044/api/tutor"
+	url := "http://10.31.11.12:9181/api/v1/tutor/GetAllTutor"
 	response, err := http.Get(url)
 	var tutorList []Object
 	if err != nil {
@@ -643,7 +643,6 @@ func receivedAnonymousComments(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			var anonymousComments []Comment = getReceivedAnonymousComments(db, TargetType, TargetID)
 			if len(anonymousComments) > 0 {
-
 				json.NewEncoder(w).Encode(anonymousComments)
 			} else {
 				w.WriteHeader(http.StatusNoContent)
