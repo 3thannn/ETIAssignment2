@@ -260,4 +260,28 @@ Status code 200 if successful, else an error code with a corresponding status me
 "CreatorName":"Kester",
 "TargetName":"Ethan"}
 ```
+### 4.1. Backend Start Up
+## Server 
+```
+cd s10185214
+git checkout server
+docker-compose build --no-cache
+docker-compose up -d
+
+```
+
+## Local 
+```
+git clone https://github.com/3thannn/ETIAssignment2
+cd to the folder cloned into
+git checkout dockerize
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+## Contact
+
+Ethan Leong - [School Email](mailto:s10185214@connect.np.edu.sg)
+
+Project Link: [https://github.com/EchoKes/Assignment2](https://github.com/EchoKes/Assignment2)
 
