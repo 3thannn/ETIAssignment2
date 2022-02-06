@@ -38,10 +38,8 @@
         </div>
     </body>
     <script>
-        url = document.URL;
-        let params = (new URL(url)).searchParams;
-        var type = params.get('type');
-        var id = params.get('id');
+        var id = 1;
+        type = "student";
         document.getElementById('allcomments').innerHTML = '<button class="btn btn-outline-success active"  style="font-size:30px; font-weight: bold;" onclick="getReceivedComments(' + "'" + type  + "'" + ',' + "'" + id + "'" + ');' + '"' + '>All Comments</button>';
         document.getElementById('anoncomments').innerHTML = '<button class="btn btn-outline-success"  style="font-size:30px; font-weight: bold;" onclick="getReceivedAnonComments('+ "'" + type + "'" + ','+ "'" + id + "'" + ');' + '"' + '>Anonymous Comments</button>';
         $("button").click(function() {
@@ -60,7 +58,7 @@
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                                      if (textStatus == "success"){
+                    if (textStatus == "success"){
                         commentsList = JSON.parse(response);
                         console.log(commentsList);
                         displayReceivedComments(commentsList, true);
