@@ -7,6 +7,7 @@
 | Rating API  | 9092 | http://10.31.11.12:9042 |
 
 ## Design Considerations
+![StructureDiagram](images/ETIAssignment2Diagram.PNG)
 Following the Microservice ideology, having a loosely coupled system would mean that functional components should be seperated and be able to run independently of each other.
 In the EDUFI Application, there are a total of 23 packages, all split into different functionalities.
 My package is in charge of the Comments and Ratings for Students.
@@ -32,6 +33,14 @@ Bootstrap was used for the simplicity of styling the frontend pages.
 
 ## Backend
 MySQL was used for the databases purely out of simplicity. It is not the lightest framework to use, however it is widely supported throughout the industry, and I am most comfortable with it.
+
+**Docker Hub Links**
+
+- [Ratings Microservice](https://hub.docker.com/repository/docker/ethanhaseaten/etiassignment2ratingdb)
+- [Ratings Database](https://hub.docker.com/repository/docker/ethanhaseaten/etiassignment2ratingdb)
+- [Comments Microservice](https://hub.docker.com/repository/docker/ethanhaseaten/commentcontainer)
+- [Comments Database](https://hub.docker.com/repository/docker/ethanhaseaten/etiassignment2commentdb)
+- [Frontend](https://hub.docker.com/repository/docker/ethanhaseaten/frontendcontainer)
 
 
 ## Front End Webpage Routes
