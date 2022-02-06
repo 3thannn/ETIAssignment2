@@ -295,8 +295,6 @@
             const data = new FormData(form);
             const jsonString = JSON.stringify(Object.fromEntries(data));
             const obj = JSON.parse(jsonString);
-            obj.CreatorID = parseInt(obj.CreatorID);
-            obj.TargetID = parseInt(obj.TargetID);
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);
@@ -441,8 +439,6 @@
             const jsonString = JSON.stringify(Object.fromEntries(data));
             const obj = JSON.parse(jsonString);
             obj.RatingScore = parseInt(obj.RatingScore);
-            obj.CreatorID = parseInt(obj.CreatorID);
-            obj.TargetID = parseInt(obj.TargetID);
             obj.Anonymous = parseInt(obj.Anonymous);
             const jsonString2 = JSON.stringify(obj);
             console.log(jsonString2);

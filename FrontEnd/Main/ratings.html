@@ -22,13 +22,13 @@
                 </div>
             </div>
             <div id="receivedRatingsHeader" class="mt-4"></div>
-            <div id="receivedRatings" style="max-height:60vh !important; overflow-y: scroll;">
+            <div id="receivedRatings" style="max-height:35vh !important; overflow-y: scroll;">
                 
             </div>
             </br>
             </br>
             <div id="postedRatingsHeader" class="mt-4"></div>
-            <div id="postedRatings" style="max-height:60vh !important; overflow-y: scroll;">
+            <div id="postedRatings" style="max-height:35vh !important; overflow-y: scroll;">
                
             </div>
             </br>
@@ -58,9 +58,15 @@
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                    ratingsList = JSON.parse(response);
-                    console.log(ratingsList);
-                    displayReceivedRatings(ratingsList);
+                    if (textStatus == "success"){
+                        ratingsList = JSON.parse(response);
+                        console.log(ratingsList);
+                        displayReceivedRatings(ratingsList);
+                    }
+                    else{
+                        ratingsList = [];
+                        displayReceivedRatings(ratingsList);
+                    }
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -76,9 +82,15 @@
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                    ratingsList = JSON.parse(response);
-                    console.log(ratingsList);
-                    displayReceivedRatings(ratingsList);
+                    if (textStatus == "success"){
+                        ratingsList = JSON.parse(response);
+                        console.log(ratingsList);
+                        displayReceivedRatings(ratingsList);
+                    }
+                    else{
+                        ratingsList = [];
+                        displayReceivedRatings(ratingsList);
+                    }
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -94,9 +106,15 @@
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                    ratingsList = JSON.parse(response);
-                    console.log(ratingsList);
-                    displayPostedRatings(ratingsList);
+                    if (textStatus == "success"){
+                        ratingsList = JSON.parse(response);
+                        console.log(ratingsList);
+                        displayPostedRatings(ratingsList);
+                    }
+                    else{
+                        ratingsList = [];
+                        displayPostedRatings(ratingsList);
+                    }
                 },
                 error: function (textStatus, errorThrown, response) {
                     console.log(response);
@@ -140,12 +158,11 @@
                         '<div class="col-8" id="' + colID + '">' + 
                         '</div>' + 
                     '</div>' ;
-                    document.getElementById('receivedRatings').innerHTML = displayData;
+                    document.getElementById('receivedRatings').innerHTML += displayData;
                     for (y = 0; y < parseInt(object.RatingScore); y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
                     }
                     var remainingStars = (5 - parseInt(object.RatingScore));
-                    console.log("remaining stars = " + remainingStars);
                     for (y = 0; y < remainingStars; y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star-o" style="font-size:30px"></i>'
                     }
@@ -187,7 +204,7 @@
                         '</div>' + 
                         '<div class=col-1>' + '<button class="btn btn-warning mt-4"'+ 'onclick="location' + ".href='" + redirectLink +"';" + '">' + 'Edit' + '</button>' + '</div>'
                     '</div>' ;
-                    document.getElementById('postedRatings').innerHTML = displayData;
+                    document.getElementById('postedRatings').innerHTML += displayData;
                     for (y = 0; y < parseInt(object.RatingScore); y++){
                         document.getElementById(colID).innerHTML += '<i class="fa fa-star" style="font-size:30px; color: #FFE606;"></i>'
                     }

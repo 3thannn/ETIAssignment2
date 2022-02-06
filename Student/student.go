@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -14,12 +13,12 @@ import (
 )
 
 type Student struct {
-	ID   int
+	ID   string
 	Name string
 }
 
 func getStudents(db *sql.DB) []Student {
-	studentquery := fmt.Sprintf("SELECT StudentID, Name FROM Student")
+	studentquery := "SELECT StudentID, Name FROM Student"
 
 	studentresults, err := db.Query(studentquery)
 	if err != nil {
@@ -36,8 +35,8 @@ func getStudents(db *sql.DB) []Student {
 	return studentList
 }
 
-func getStudent(db *sql.DB, ID int) Student {
-	studentquery := fmt.Sprintf("SELECT StudentID, Name FROM Student WHERE StudentID = '%d'", ID)
+func getStudent(db *sql.DB, ID string) Student {
+	studentquery := fmt.Sprintf("SELECT StudentID, Name FROM Student WHERE StudentID = '%s'", ID)
 
 	studentresults, err := db.Query(studentquery)
 	if err != nil {
@@ -83,13 +82,9 @@ func student(w http.ResponseWriter, r *http.Request) {
 	}
 	params := mux.Vars(r)
 	studentID := params["studentid"]
-	studentIDint, err := strconv.Atoi(studentID)
-	if err != nil {
-		panic(err.Error())
-	}
 	if r.Method == "GET" {
 		if err == nil {
-			student := getStudent(db, studentIDint)
+			student := getStudent(db, studentID)
 			fmt.Println(student)
 			json.NewEncoder(w).Encode(student)
 		} else {

@@ -23,14 +23,14 @@
             </div>
             <div id="receivedCommentsHeader" class="mt-4">
             </div>
-            <div id="receivedComments" style="max-height:60vh !important; overflow-y: scroll;">
+            <div id="receivedComments" style="max-height:35vh !important; overflow-y: scroll;">
                 
             </div>
             </br>
             </br>
             </br>
             <div id="postedCommentsHeader" class="mt-4"></div>
-            <div id="postedComments" style="max-height:60vh !important; overflow-y: scroll;">
+            <div id="postedComments" style="max-height:35vh !important; overflow-y: scroll;">
                
             </div>
             </br>
@@ -55,16 +55,22 @@
         getReceivedComments(type, id);
         getPostedComments(type,id);
         function getReceivedComments(type, id){
-            url = "http://localhost:9041/api/comment/received/" + type + "/" + id;
+            url = "http://localhost:9041/api/comment/received/" + type + "/" + id;           
             $.ajax({
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                    commentsList = JSON.parse(response);
-                    console.log(commentsList);
-                    displayReceivedComments(commentsList);
+                                      if (textStatus == "success"){
+                        commentsList = JSON.parse(response);
+                        console.log(commentsList);
+                        displayReceivedComments(commentsList, true);
+                    }
+                    else{                      
+                        commentsList = [];
+                        displayReceivedComments(commentsList);
+                    }
                 },
-                error: function (textStatus, errorThrown, response) {
+                error: function (textStatus, errorThrown, response) {                   
                     console.log(response);
                     commentsList = [];
                     displayReceivedComments(commentsList);
@@ -73,17 +79,24 @@
         }
         function getReceivedAnonComments(type, id){
             document.getElementById('receivedComments').innerHTML = '';
-            url = "http://localhost:9041/api/comment/received/anonymous/" + type + "/" + id;
+            url = "http://localhost:9041/api/comment/received/anonymous/" + type + "/" + id;           
             $.ajax({
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                    commentsList = JSON.parse(response);
-                    console.log(commentsList);
-                    displayReceivedComments(commentsList, true);
-                },
-                error: function (textStatus, errorThrown, response) {
                     console.log(response);
+                    console.log(textStatus);
+                    if (textStatus == "success"){                      
+                        commentsList = JSON.parse(response);
+                        console.log(commentsList);
+                        displayReceivedComments(commentsList, true);
+                    }
+                    else{                        
+                        commentsList = [];
+                        displayReceivedComments(commentsList);
+                    }
+                },
+                error: function (textStatus, errorThrown, response) {                    
                     commentsList = [];
                     displayReceivedComments(commentsList);
                 }
@@ -96,12 +109,17 @@
                 type: "GET",
                 url: url,
                 success: function (response, textStatus) {
-                    commentsList = JSON.parse(response);
-                    console.log(commentsList);
-                    displayPostedComments(commentsList, false);
+                    if (textStatus == "success"){
+                        commentsList = JSON.parse(response);
+                        console.log(commentsList);
+                        displayPostedComments(commentsList, true);
+                    }
+                    else{
+                        commentsList = [];
+                        displayPostedComments(commentsList);
+                    }
                 },
                 error: function (textStatus, errorThrown, response) {
-                    console.log(response);
                     commentsList = [];
                     displayPostedComments(commentsList);
                 }
@@ -145,7 +163,7 @@
                             object.CommentData  + 
                         '</div>' + 
                     '</div>' ;
-                    document.getElementById('receivedComments').innerHTML = displayData;
+                    document.getElementById('receivedComments').innerHTML += displayData;
                 }
             }     
         }
@@ -184,7 +202,7 @@
                         '</div>' +  
                         '<div class=col-1>' + '<button class="btn btn-warning mt-4"'+ 'onclick="location' + ".href='" + redirectLink +"';" + '">' + 'Edit' + '</button>' + '</div>'
                     '</div>' ;
-                    document.getElementById('postedComments').innerHTML = displayData;
+                    document.getElementById('postedComments').innerHTML += displayData;
                 }
             }     
         }

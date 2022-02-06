@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -16,9 +15,9 @@ import (
 
 type Rating struct {
 	RatingID          int
-	CreatorID         int
+	CreatorID         string
 	CreatorType       string
-	TargetID          int
+	TargetID          string
 	TargetType        string
 	RatingScore       int
 	Anonymous         int
@@ -28,7 +27,7 @@ type Rating struct {
 }
 
 type Object struct {
-	ID   int
+	ID   string
 	Name string
 }
 
@@ -109,7 +108,7 @@ func getAllModules(db *sql.DB) []Object {
 	return moduleList
 }
 
-func linkStudentToID(db *sql.DB, id int, studentList []Object) Object {
+func linkStudentToID(db *sql.DB, id string, studentList []Object) Object {
 	var student Object
 	for _, student := range studentList {
 		if student.ID == id {
@@ -119,7 +118,7 @@ func linkStudentToID(db *sql.DB, id int, studentList []Object) Object {
 	return student
 }
 
-func linkTutorToID(db *sql.DB, id int, tutorList []Object) Object {
+func linkTutorToID(db *sql.DB, id string, tutorList []Object) Object {
 	var tutor Object
 	for _, tutor := range tutorList {
 		if tutor.ID == id {
@@ -129,7 +128,7 @@ func linkTutorToID(db *sql.DB, id int, tutorList []Object) Object {
 	return tutor
 }
 
-func linkClassToID(db *sql.DB, id int, classList []Object) Object {
+func linkClassToID(db *sql.DB, id string, classList []Object) Object {
 	var class Object
 	for _, class := range classList {
 		if class.ID == id {
@@ -139,7 +138,7 @@ func linkClassToID(db *sql.DB, id int, classList []Object) Object {
 	return class
 }
 
-func linkModuleToID(db *sql.DB, id int, moduleList []Object) Object {
+func linkModuleToID(db *sql.DB, id string, moduleList []Object) Object {
 	var module Object
 	for _, module := range moduleList {
 		if module.ID == id {
@@ -149,12 +148,12 @@ func linkModuleToID(db *sql.DB, id int, moduleList []Object) Object {
 	return module
 }
 
-func getRating(db *sql.DB, RatingId int) Rating {
+func getRating(db *sql.DB, RatingID string) Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
 	classList := getAllClasses(db)
-	query := fmt.Sprintf("SELECT * FROM Rating WHERE RatingId = '%d';", RatingId)
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE RatingID = '%s';", RatingID)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -188,10 +187,10 @@ func getRating(db *sql.DB, RatingId int) Rating {
 	return rating
 }
 
-func getStudentRatings(db *sql.DB, targetID int) []Rating {
+func getStudentRatings(db *sql.DB, targetID string) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
-	studentquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Student' AND TargetID = '%d'", targetID)
+	studentquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Student' AND TargetID = '%s'", targetID)
 	studentresults, err := db.Query(studentquery)
 	if err != nil {
 		panic(err.Error())
@@ -217,11 +216,11 @@ func getStudentRatings(db *sql.DB, targetID int) []Rating {
 	return studentRatingList
 }
 
-func getClassRatings(db *sql.DB, targetID int) []Rating {
+func getClassRatings(db *sql.DB, targetID string) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	classList := getAllClasses(db)
-	classquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Class' AND TargetID = '%d'", targetID)
+	classquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Class' AND TargetID = '%s'", targetID)
 	classresults, err := db.Query(classquery)
 	if err != nil {
 		panic(err.Error())
@@ -247,11 +246,11 @@ func getClassRatings(db *sql.DB, targetID int) []Rating {
 	return classRatingList
 }
 
-func getModuleRatings(db *sql.DB, targetID int) []Rating {
+func getModuleRatings(db *sql.DB, targetID string) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
-	modulequery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Module' AND TargetID = '%d'", targetID)
+	modulequery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Module' AND TargetID = '%s'", targetID)
 	moduleresults, err := db.Query(modulequery)
 	if err != nil {
 		panic(err.Error())
@@ -277,10 +276,10 @@ func getModuleRatings(db *sql.DB, targetID int) []Rating {
 	return moduleRatingList
 }
 
-func getTutorRatings(db *sql.DB, targetID int) []Rating {
+func getTutorRatings(db *sql.DB, targetID string) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
-	tutorquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Tutor' AND TargetID = '%d'", targetID)
+	tutorquery := fmt.Sprintf("SELECT * FROM Rating WHERE TargetType = 'Tutor' AND TargetID = '%s'", targetID)
 	tutorresults, err := db.Query(tutorquery)
 	if err != nil {
 		panic(err.Error())
@@ -306,103 +305,15 @@ func getTutorRatings(db *sql.DB, targetID int) []Rating {
 	return tutorRatingList
 }
 
-func studentRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	studentID := params["studentid"]
-	studentIDint, err := strconv.Atoi(studentID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		studentRatingList := getStudentRatings(db, studentIDint)
-		if len(studentRatingList) > 0 {
-			fmt.Println(studentRatingList)
-			json.NewEncoder(w).Encode(studentRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func tutorRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	tutorID := params["tutorid"]
-	tutorIDint, err := strconv.Atoi(tutorID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		tutorRatingList := getTutorRatings(db, tutorIDint)
-		if len(tutorRatingList) > 0 {
-			fmt.Println(tutorRatingList)
-			json.NewEncoder(w).Encode(tutorRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func classRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	classID := params["classid"]
-	classIDint, err := strconv.Atoi(classID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		classRatingList := getClassRatings(db, classIDint)
-		if len(classRatingList) > 0 {
-			fmt.Println(classRatingList)
-			json.NewEncoder(w).Encode(classRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
-func moduleRatings(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
-	if err != nil {
-		panic(err.Error())
-	}
-	params := mux.Vars(r)
-	moduleID := params["moduleid"]
-	moduleIDint, err := strconv.Atoi(moduleID)
-	if err != nil {
-		panic(err.Error())
-	}
-	if r.Method == "GET" {
-		moduleRatingList := getModuleRatings(db, moduleIDint)
-		if len(moduleRatingList) > 0 {
-			fmt.Println(moduleRatingList)
-			json.NewEncoder(w).Encode(moduleRatingList)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}
-}
-
 //Get all Ratings posted
-func getPostedRatings(db *sql.DB, CreatorType string, CreatorID int) []Rating {
+func getPostedRatings(db *sql.DB, CreatorType string, CreatorID string) []Rating {
 	fmt.Println("this ran here!")
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
 	classList := getAllClasses(db)
 	var RatingList []Rating
-	query := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%d' AND CreatorType = '%s'", CreatorID, CreatorType)
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE CreatorID = '%s' AND CreatorType = '%s'", CreatorID, CreatorType)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -438,13 +349,13 @@ func getPostedRatings(db *sql.DB, CreatorType string, CreatorID int) []Rating {
 }
 
 //Get all Ratings received
-func getReceivedRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
+func getReceivedRatings(db *sql.DB, TargetType string, TargetID string) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
 	classList := getAllClasses(db)
 	var RatingList []Rating
-	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%d' AND TargetType = '%s'", TargetID, TargetType)
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%s' AND TargetType = '%s'", TargetID, TargetType)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -480,13 +391,13 @@ func getReceivedRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
 }
 
 //Get all Ratings received
-func getReceivedAnonymousRatings(db *sql.DB, TargetType string, TargetID int) []Rating {
+func getReceivedAnonymousRatings(db *sql.DB, TargetType string, TargetID string) []Rating {
 	studentList := getAllStudents(db)
 	tutorList := getAllTutors(db)
 	moduleList := getAllModules(db)
 	classList := getAllClasses(db)
 	var RatingList []Rating
-	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%d' AND TargetType = '%s' AND Anonymous = True", TargetID, TargetType)
+	query := fmt.Sprintf("SELECT * FROM Rating WHERE TargetID = '%s' AND TargetType = '%s' AND Anonymous = True", TargetID, TargetType)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -534,7 +445,7 @@ func postRating(db *sql.DB, rating Rating) {
 	println(rating.Anonymous)
 	TargetType := rating.TargetType
 
-	query := fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous, DateTimePublished) VALUES ('%d', '%s', '%d', '%s', '%d', '%b', NOW())",
+	query := fmt.Sprintf("INSERT INTO Rating (CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous, DateTimePublished) VALUES ('%s', '%s', '%s', '%s', '%d', '%b', NOW())",
 		CreatorID, CreatorType, TargetID, TargetType, RatingScore, Anonymous)
 	_, err := db.Query(query) //Run Query
 
@@ -560,15 +471,15 @@ func rating(w http.ResponseWriter, r *http.Request) {
 	}
 	params := mux.Vars(r)
 	TargetID := params["id"]
-	TargetIDInt, err := strconv.Atoi(TargetID)
 	if err != nil {
 		panic(err.Error())
 	}
 	if r.Method == "GET" {
-		println(TargetIDInt)
-		var rating = getRating(db, TargetIDInt)
+		println(TargetID)
+		var rating = getRating(db, TargetID)
 		fmt.Println(rating)
 		json.NewEncoder(w).Encode(rating)
+
 	}
 	if r.Method == "POST" {
 		var newRating Rating
@@ -591,7 +502,7 @@ func rating(w http.ResponseWriter, r *http.Request) {
 			json.Unmarshal(reqBody, &rating)
 			fmt.Println(rating)
 			updateRecord(db, rating)
-			w.WriteHeader(http.StatusCreated)
+
 			w.Write([]byte("201 - Rating Updated!"))
 		} else {
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -635,15 +546,14 @@ func receivedRatings(w http.ResponseWriter, r *http.Request) {
 	TargetID := params["id"]
 	println(TargetType)
 	println(TargetID)
-	TargetIDInt, err := strconv.Atoi(TargetID)
 	if r.Method == "GET" {
 		if err == nil {
-			var personalRatings []Rating = getReceivedRatings(db, TargetType, TargetIDInt)
+			var personalRatings []Rating = getReceivedRatings(db, TargetType, TargetID)
 			if len(personalRatings) > 0 {
 				fmt.Println(personalRatings)
 				json.NewEncoder(w).Encode(personalRatings)
 			} else {
-				w.WriteHeader(http.StatusNotFound)
+				w.WriteHeader(http.StatusNoContent)
 			}
 		} else {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
@@ -663,15 +573,15 @@ func receivedAnonymousRatings(w http.ResponseWriter, r *http.Request) {
 	TargetID := params["id"]
 	println(TargetType)
 	println(TargetID)
-	TargetIDInt, err := strconv.Atoi(TargetID)
 	if r.Method == "GET" {
 		if err == nil {
-			var anonymousRatings []Rating = getReceivedAnonymousRatings(db, TargetType, TargetIDInt)
+			var anonymousRatings []Rating = getReceivedAnonymousRatings(db, TargetType, TargetID)
 			if len(anonymousRatings) > 0 {
 				fmt.Println(anonymousRatings)
+
 				json.NewEncoder(w).Encode(anonymousRatings)
 			} else {
-				w.WriteHeader(http.StatusNotFound)
+				w.WriteHeader(http.StatusNoContent)
 			}
 		} else {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
@@ -689,21 +599,93 @@ func postedRatings(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	CreatorType := params["type"]
 	CreatorID := params["id"]
-	CreatorIDInt, err := strconv.Atoi(CreatorID)
-	if err != nil {
-		panic(err.Error())
-	}
 	if r.Method == "GET" {
 		if err == nil {
-			var postedRatingsList []Rating = getPostedRatings(db, CreatorType, CreatorIDInt)
+			var postedRatingsList []Rating = getPostedRatings(db, CreatorType, CreatorID)
 			if len(postedRatingsList) > 0 {
 				fmt.Println(postedRatingsList)
 				json.NewEncoder(w).Encode(postedRatingsList)
 			} else {
-				w.WriteHeader(http.StatusNotFound)
+				w.WriteHeader(http.StatusNoContent)
 			}
 		} else {
 			fmt.Printf("The HTTP request failed with error %s\n", err)
+		}
+	}
+}
+
+func studentRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	studentID := params["studentid"]
+	if r.Method == "GET" {
+		studentRatingList := getStudentRatings(db, studentID)
+		if len(studentRatingList) > 0 {
+			fmt.Println(studentRatingList)
+
+			json.NewEncoder(w).Encode(studentRatingList)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func tutorRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	tutorID := params["tutorid"]
+	if r.Method == "GET" {
+		tutorRatingList := getTutorRatings(db, tutorID)
+		if len(tutorRatingList) > 0 {
+			fmt.Println(tutorRatingList)
+			json.NewEncoder(w).Encode(tutorRatingList)
+
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func classRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	classID := params["classid"]
+	if r.Method == "GET" {
+		classRatingList := getClassRatings(db, classID)
+		if len(classRatingList) > 0 {
+			fmt.Println(classRatingList)
+			json.NewEncoder(w).Encode(classRatingList)
+
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func moduleRatings(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("mysql", "root:password@tcp(db2:9048)/ETIAssignment2Rating")
+	if err != nil {
+		panic(err.Error())
+	}
+	params := mux.Vars(r)
+	moduleID := params["moduleid"]
+	if r.Method == "GET" {
+		moduleRatingList := getModuleRatings(db, moduleID)
+		if len(moduleRatingList) > 0 {
+			fmt.Println(moduleRatingList)
+			json.NewEncoder(w).Encode(moduleRatingList)
+
+		} else {
+			w.WriteHeader(http.StatusNotFound)
 		}
 	}
 }

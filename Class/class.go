@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -14,12 +13,12 @@ import (
 )
 
 type ClassObject struct {
-	ID   int
+	ID   string
 	Name string
 }
 
-func getClass(db *sql.DB, ID int) ClassObject {
-	classQuery := fmt.Sprintf("SELECT ClassID, Name FROM Class WHERE ClassID = '%d'", ID)
+func getClass(db *sql.DB, ID string) ClassObject {
+	classQuery := fmt.Sprintf("SELECT ClassID, Name FROM Class WHERE ClassID = '%s'", ID)
 
 	classResults, err := db.Query(classQuery)
 	if err != nil {
@@ -83,13 +82,10 @@ func class(w http.ResponseWriter, r *http.Request) {
 	}
 	params := mux.Vars(r)
 	classID := params["classid"]
-	classIDint, err := strconv.Atoi(classID)
-	if err != nil {
-		panic(err.Error())
-	}
+
 	if r.Method == "GET" {
 		if err == nil {
-			classObject := getClass(db, classIDint)
+			classObject := getClass(db, classID)
 			fmt.Println(classObject)
 			json.NewEncoder(w).Encode(classObject)
 		} else {

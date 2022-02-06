@@ -7,9 +7,9 @@ USE ETIAssignment2Rating;
 DROP TABLE IF EXISTS Rating;
 CREATE TABLE Rating(
 	RatingID int NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	CreatorID int NULL,
+	CreatorID varchar (9) NULL,
 	CreatorType varchar(255),
-	TargetID int NOT NULL,
+	TargetID varchar (9) NOT NULL,
     TargetType varchar(255) NOT NULL,
 	RatingScore int NOT NULL,
 	Anonymous bool NOT NULL DEFAULT False,

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -14,12 +13,12 @@ import (
 )
 
 type Module struct {
-	ID   int
+	ID   string
 	Name string
 }
 
-func getModule(db *sql.DB, ID int) Module {
-	modulequery := fmt.Sprintf("SELECT ModuleID, Name FROM Module WHERE ModuleID = '%d'", ID)
+func getModule(db *sql.DB, ID string) Module {
+	modulequery := fmt.Sprintf("SELECT ModuleID, Name FROM Module WHERE ModuleID = '%s'", ID)
 
 	moduleResults, err := db.Query(modulequery)
 	if err != nil {
@@ -81,13 +80,10 @@ func module(w http.ResponseWriter, r *http.Request) {
 	}
 	params := mux.Vars(r)
 	moduleID := params["moduleid"]
-	moduleIDint, err := strconv.Atoi(moduleID)
-	if err != nil {
-		panic(err.Error())
-	}
+
 	if r.Method == "GET" {
 		if err == nil {
-			moduleObject := getModule(db, moduleIDint)
+			moduleObject := getModule(db, moduleID)
 			fmt.Println(moduleObject)
 			json.NewEncoder(w).Encode(moduleObject)
 		} else {

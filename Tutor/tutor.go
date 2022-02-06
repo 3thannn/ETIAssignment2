@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -14,7 +13,7 @@ import (
 )
 
 type Tutor struct {
-	ID   int
+	ID   string
 	Name string
 }
 
@@ -36,8 +35,8 @@ func getTutors(db *sql.DB) []Tutor {
 	return tutorList
 }
 
-func getTutor(db *sql.DB, ID int) Tutor {
-	tutorQuery := fmt.Sprintf("SELECT TutorID, Name FROM Tutor WHERE TutorID = '%d'", ID)
+func getTutor(db *sql.DB, ID string) Tutor {
+	tutorQuery := fmt.Sprintf("SELECT TutorID, Name FROM Tutor WHERE TutorID = '%s'", ID)
 
 	tutorResults, err := db.Query(tutorQuery)
 	if err != nil {
@@ -84,13 +83,9 @@ func tutor(w http.ResponseWriter, r *http.Request) {
 	}
 	params := mux.Vars(r)
 	tutorID := params["tutorid"]
-	tutorIDint, err := strconv.Atoi(tutorID)
-	if err != nil {
-		panic(err.Error())
-	}
 	if r.Method == "GET" {
 		if err == nil {
-			tutor := getTutor(db, tutorIDint)
+			tutor := getTutor(db, tutorID)
 			fmt.Println(tutor)
 			json.NewEncoder(w).Encode(tutor)
 		} else {
