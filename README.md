@@ -7,7 +7,7 @@
 | Rating API  | 9092 | http://10.31.11.12:9042 |
 
 ## Design Considerations
-![StructureDiagram](Images/ETIAssignment2Diagram.PNG)
+![StructureDiagram](Images/ETIAssignment2Diagram.png)
 Following the Microservice ideology, having a loosely coupled system would mean that functional components should be seperated and be able to run independently of each other.
 In the EDUFI Application, there are a total of 23 packages, all split into different functionalities.
 My package is in charge of the Comments and Ratings for Students.
